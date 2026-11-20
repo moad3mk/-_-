@@ -25,26 +25,36 @@ h1{font-size:clamp(28px,6vw,44px);color:#e7c27b;margin:0}p{color:#c4d1c7;font-si
 <div class="top"><div class="logo">LAST HOPE <span style="color:#e7c27b">: SURVIVAL</span></div><div class="stats"><div class="tag">🪵 <span id="wood">0</span></div><div class="tag">🪨 <span id="stone">0</span></div><div class="tag">☀️ <span id="time">08:00</span></div></div></div>
 <div class="quest">مهمتك: اجمع 5 خشب و3 حجر<br><span id="progress">0 / 5 خشب · 0 / 3 حجر</span></div>
 <div class="health">❤️ الصحة<div class="track"><div class="fill" id="hp"></div></div></div>
-<div id="stick"><div id="nub"></div></div><div class="buttons"><button id="gather">جمع</button><button id="attack">ضرب</button><button id="sprint">ركض</button></div><div id="hint">استكشف الجزيرة واجمع الموارد وابتعد عن الوحوش</div></div>
-<div id="menu"><div class="panel"><h1>LAST HOPE</h1><b style="letter-spacing:4px;color:#e7c27b">SURVIVAL</b><p>جزيرة مهجورة، موارد محدودة، ووحوش تتجول بين الأشجار.<br>اللعبة تعمل محلياً بدون مكتبات خارجية.</p><button class="start" id="start">ابدأ اللعب</button><p>حرّك عصا التحكم للمشي · جمع لالتقاط الموارد · ضرب لمواجهة الوحوش</p></div></div>
+<div id="stick"><div id="nub"></div></div><div class="buttons"><button id="gather">جمع</button><button id="attack">ضرب</button><button id="sprint">ركض</button></div><div id="hint">قرّب شخصيتك من الشجرة حتى تظهر دائرة ذهبية، ثم اضغط جمع</div></div>
+<div id="menu"><div class="panel"><h1>LAST HOPE</h1><b style="letter-spacing:4px;color:#e7c27b">SURVIVAL</b><p>جزيرة مهجورة، موارد محدودة، ووحوش تتجول بين الأشجار.<br>اللعبة تعمل محلياً بدون مكتبات خارجية.</p><button class="start" id="start">ابدأ اللعب</button><p>حرّك عصا التحكم للمشي · اقترب من الشجرة واضغط جمع مرة واحدة لتكسيرها · اضرب الوحوش</p></div></div>
 </div><div id="rotate">↻<br>لف هاتفك للوضع الأفقي<br><small style="font-size:12px;color:#aab">اللعبة مصممة للعب بالعرض</small></div>
 <script>
 (()=>{
 const canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id);
-let W=800,H=450,playing=false,last=0,wood=0,stone=0,hp=100,day=8,run=false,attackWait=0,damageWait=0;
+let W=800,H=450,playing=false,last=0,wood=0,stone=0,hp=100,day=8,run=false,attackWait=0,damageWait=0,walkTime=0,toastTimer=0;
 const player={x:0,y:0,angle:0},joy={x:0,y:0};const keys={};let objects=[],enemies=[];
 function resize(){let r=canvas.getBoundingClientRect();W=canvas.width=Math.max(1,Math.round(r.width*devicePixelRatio));H=canvas.height=Math.max(1,Math.round(r.height*devicePixelRatio));ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);W=r.width;H=r.height}
 addEventListener('resize',resize);screen.orientation?.addEventListener?.('change',resize);resize();
 function rand(a,b){return a+Math.random()*(b-a)}
 function reset(){wood=stone=0;hp=100;day=8;player.x=player.y=0;objects=[];enemies=[];
-for(let i=0;i<85;i++){let a=rand(0,Math.PI*2),r=i<18?rand(35,150):rand(150,650);objects.push({x:Math.cos(a)*r,y:Math.sin(a)*r,type:Math.random()<.72?'tree':'rock',life:2})}
-for(let i=0;i<7;i++){let a=rand(0,6.28),r=rand(260,540);enemies.push({x:Math.cos(a)*r,y:Math.sin(a)*r,life:3,alive:true})}}
+for(let i=0;i<95;i++){let a=rand(0,Math.PI*2),r=i<30?rand(45,210):rand(220,700);objects.push({x:Math.cos(a)*r,y:Math.sin(a)*r,type:Math.random()<.72?'tree':'rock',life:1})}
+for(let i=0;i<6;i++){let a=rand(0,6.28),r=rand(170,280);enemies.push({x:Math.cos(a)*r,y:Math.sin(a)*r,life:3,alive:true})}}
 function project(x,y){let dx=x-player.x,dy=y-player.y;return {x:W/2+(dx-dy)*.72,y:H/2+(dx+dy)*.36}}
 function ellipse(x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}
 function drawTree(o,p){ellipse(p.x,p.y+8,15,7,'#172d20aa');ctx.fillStyle='#65462b';ctx.fillRect(p.x-4,p.y-23,8,28);ellipse(p.x,p.y-32,21,20,'#285b3b');ellipse(p.x-10,p.y-39,13,13,'#36734a');ellipse(p.x+10,p.y-42,13,14,'#1e5035')}
 function drawRock(o,p){ellipse(p.x,p.y+4,14,6,'#172d20aa');ctx.fillStyle='#818c83';ctx.beginPath();ctx.moveTo(p.x-13,p.y);ctx.lineTo(p.x-7,p.y-15);ctx.lineTo(p.x+5,p.y-20);ctx.lineTo(p.x+15,p.y-7);ctx.lineTo(p.x+12,p.y+3);ctx.closePath();ctx.fill()}
-function drawEnemy(e,p){ellipse(p.x,p.y+5,12,5,'#14251c99');ellipse(p.x,p.y-8,10,15,'#a34e42');ellipse(p.x,p.y-23,8,8,'#96735e');ctx.fillStyle='#ff4444';ctx.fillRect(p.x-4,p.y-25,2,2);ctx.fillRect(p.x+3,p.y-25,2,2)}
-function drawPlayer(){let p=project(player.x,player.y);ellipse(p.x,p.y+9,20,8,'#14251c99');ctx.save();ctx.translate(p.x,p.y);ctx.rotate(player.angle);ctx.fillStyle='#493a2a';ctx.fillRect(-13,-13,8,22);ctx.fillStyle='#315d58';ctx.beginPath();ctx.roundRect(-12,-29,24,30,8);ctx.fill();ctx.fillStyle='#d0a17c';ctx.beginPath();ctx.arc(0,-39,11,0,Math.PI*2);ctx.fill();ctx.fillStyle='#392b20';ctx.beginPath();ctx.arc(0,-43,11,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#e8c18c';ctx.fillRect(-5,-40,2,2);ctx.fillRect(4,-40,2,2);ctx.fillStyle='#704b2c';ctx.fillRect(-17,-25,6,20);ctx.fillRect(11,-25,6,20);ctx.fillStyle='#253e38';ctx.fillRect(-10,-1,8,8);ctx.fillRect(3,-1,8,8);ctx.restore();ctx.fillStyle='#fff';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('أنت',p.x,p.y-58)}
+function drawEnemy(e,p){ellipse(p.x,p.y+8,17,7,'#14251cbb');ctx.fillStyle='#632d2b';ctx.fillRect(p.x-10,p.y-22,20,28);ellipse(p.x,p.y-26,13,13,'#b66a53');ctx.fillStyle='#ffdf75';ctx.fillRect(p.x-7,p.y-29,4,4);ctx.fillRect(p.x+3,p.y-29,4,4);ctx.strokeStyle='#34201b';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(p.x-8,p.y-4);ctx.lineTo(p.x-15,p.y+7);ctx.moveTo(p.x+8,p.y-4);ctx.lineTo(p.x+15,p.y+7);ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('وحش',p.x,p.y-47)}
+function drawPlayer(){let p=project(player.x,player.y),step=Math.sin(walkTime*10)*4;ellipse(p.x,p.y+11,22,9,'#14251cbb');ctx.save();ctx.translate(p.x,p.y);ctx.rotate(player.angle);ctx.lineCap='round';
+ctx.strokeStyle='#273b35';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-6,-8);ctx.lineTo(-8+step,-1);ctx.moveTo(6,-8);ctx.lineTo(8-step,-1);ctx.stroke();
+ctx.fillStyle='#315d58';ctx.beginPath();ctx.roundRect(-13,-34,26,29,8);ctx.fill();
+ctx.strokeStyle='#d0a17c';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-11,-29);ctx.lineTo(-17,-14-step*.3);ctx.moveTo(11,-29);ctx.lineTo(17,-14+step*.3);ctx.stroke();
+ctx.fillStyle='#d0a17c';ctx.beginPath();ctx.arc(0,-45,11,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#392b20';ctx.beginPath();ctx.arc(0,-48,11,Math.PI,Math.PI*2);ctx.fill();
+ctx.fillStyle='#e8c18c';ctx.fillRect(-5,-46,2,2);ctx.fillRect(4,-46,2,2);
+ctx.fillStyle='#704b2c';ctx.fillRect(-17,-19,6,6);ctx.fillRect(11,-19,6,6);
+ctx.fillStyle='#253e38';ctx.fillRect(-11,-5,9,9);ctx.fillRect(3,-5,9,9);
+ctx.fillStyle='#bd9b63';ctx.fillRect(13,-27,4,18);ctx.restore();
+ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText('أنت',p.x,p.y-65)}
 function render(){ctx.clearRect(0,0,W,H);let grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#6c9d83');grad.addColorStop(1,'#365d43');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
 for(let i=-8;i<9;i++)for(let j=-8;j<9;j++){let p=project(i*90,j*90);ctx.strokeStyle='#ffffff09';ctx.beginPath();ctx.moveTo(p.x-35,p.y);ctx.lineTo(p.x,p.y+18);ctx.lineTo(p.x+35,p.y);ctx.stroke()}
 let items=objects.filter(o=>o.life>0).map(o=>({o,p:project(o.x,o.y),z:o.x+o.y})).concat(enemies.filter(e=>e.alive).map(e=>({e,p:project(e.x,e.y),z:e.x+e.y})));items.sort((a,b)=>a.z-b.z);
@@ -52,12 +62,13 @@ for(let it of items){if(it.o)it.o.type==='tree'?drawTree(it.o,it.p):drawRock(it.
 drawPlayer();
 if(day>18||day<6){ctx.fillStyle='#08142a66';ctx.fillRect(0,0,W,H)}
 }
-function nearest(){let best=null,d=125;for(let o of objects){if(o.life<=0)continue;let n=Math.hypot(o.x-player.x,o.y-player.y);if(n<d){d=n;best=o}}return best}
-function gather(){let o=nearest();if(!o){say('امشِ باتجاه الشجرة حتى تقترب منها');return}o.life--;if(o.life<=0){if(o.type==='tree'){wood+=3;say('🌲 تكسرت الشجرة! جمعت 3 أخشاب')}else{stone+=2;say('🪨 كسرت الصخرة! جمعت حجرين')}update()}else say(o.type==='tree'?'تضرب الشجرة... ضربة أخيرة!':'تضرب الصخرة... ضربة أخيرة!')}
+function nearest(){let best=null,d=160;for(let o of objects){if(o.life<=0)continue;let n=Math.hypot(o.x-player.x,o.y-player.y);if(n<d){d=n;best=o}}return best}
+function gather(){let o=nearest();if(!o){say('اقترب أكثر من الشجرة أو الصخرة — تظهر حولها دائرة ذهبية');return}
+o.life=0;if(o.type==='tree'){wood+=3;say('🪵 تكسرت الشجرة! حصلت على 3 أخشاب')}else{stone+=2;say('🪨 تكسرت الصخرة! حصلت على حجرين')}update()}
 function hit(){if(attackWait>0)return;attackWait=.5;let e=enemies.find(e=>e.alive&&Math.hypot(e.x-player.x,e.y-player.y)<75);if(e){e.life--;if(e.life<=0){e.alive=false;say('قضيت على الوحش!')}else say('أصبته!')}else say('مافيش وحش قريب')}
 function say(t){$('hint').textContent=t;clearTimeout(say.t);say.t=setTimeout(()=>$('hint').textContent='استكشف الجزيرة واجمع الموارد وابتعد عن الوحوش',1800)}
 function update(){ $('wood').textContent=wood;$('stone').textContent=stone;$('progress').textContent=wood+' / 5 خشب · '+stone+' / 3 حجر';$('hp').style.width=hp+'%'}
-function move(dt){let x=joy.x,y=joy.y;if(keys.KeyW||keys.ArrowUp)y-=1;if(keys.KeyS||keys.ArrowDown)y+=1;if(keys.KeyA||keys.ArrowLeft)x-=1;if(keys.KeyD||keys.ArrowRight)x+=1;let n=Math.hypot(x,y);if(n>1){x/=n;y/=n}let fast=(run||keys.ShiftLeft)&&hp>0,speed=fast?210:125;if(n>.05){player.x+=x*speed*dt;player.y+=y*speed*dt;player.angle=Math.atan2(y,x)}
+function move(dt){let x=joy.x,y=joy.y;if(keys.KeyW||keys.ArrowUp)y-=1;if(keys.KeyS||keys.ArrowDown)y+=1;if(keys.KeyA||keys.ArrowLeft)x-=1;if(keys.KeyD||keys.ArrowRight)x+=1;let n=Math.hypot(x,y);if(n>1){x/=n;y/=n}let fast=(run||keys.ShiftLeft)&&hp>0,speed=fast?210:125;if(n>.05){player.x+=x*speed*dt;player.y+=y*speed*dt;player.angle=Math.atan2(y,x);walkTime+=dt}
 for(let e of enemies){if(!e.alive)continue;let dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);if(d<360&&d>22){e.x+=dx/d*48*dt;e.y+=dy/d*48*dt}if(d<35&&damageWait<=0){hp=Math.max(0,hp-8);damageWait=1;update();say('الوحش هاجمك!')}}
 attackWait=Math.max(0,attackWait-dt);damageWait=Math.max(0,damageWait-dt);day=(day+dt*.08)%24;$('time').textContent=String(Math.floor(day)).padStart(2,'0')+':'+String(Math.floor(day%1*60)).padStart(2,'0');
 if(hp<=0){playing=false;$('menu').style.display='flex';$('menu').querySelector('h1').textContent='انتهت الرحلة';$('menu').querySelector('p').textContent='جمعت '+wood+' أخشاب و'+stone+' أحجار. حاول مرة ثانية.';$('start').textContent='إعادة اللعب'}}
