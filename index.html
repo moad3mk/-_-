@@ -12,10 +12,6 @@
 <div id="stick"><div id="nub"></div></div><div class="buttons"><button id="gather">جمع</button><button id="attack">ضرب</button><button id="sprint">ركض</button></div><div id="hint">وجّه علامة التصويب نحو مورد، اضربه 3 مرات ثم اجمعه</div></div>
 <div id="menu"><div class="panel"><h1>LAST HOPE</h1><b style="letter-spacing:4px;color:#e7c27b">SURVIVAL · FIRST PERSON</b><p>أنت داخل الجزيرة الآن. انظر حولك، واجه الوحوش، واضرب الأشجار والصخور أمامك حتى تتحطم ثم اجمع مواردها.</p><button class="start" id="start" type="button" >ابدأ اللعب</button><p>العصا اليسرى للحركة · اسحب يمين الشاشة للنظر حولك · زر الضرب للتكسير · زر الجمع لالتقاط الموارد</p></div></div></div><div id="rotate">↻<br>لف هاتفك للوضع الأفقي<br><small style="font-size:12px;color:#aab">اللعبة مصممة للعب بالعرض</small></div>
 <script>
-window.addEventListener('error',function(e){var p=document.querySelector('#menu .panel p');if(p)p.textContent='تعذر تشغيل اللعبة: '+(e.message||'خطأ JavaScript')});
-window.addEventListener('unhandledrejection',function(e){var p=document.querySelector('#menu .panel p');if(p)p.textContent='تعذر تشغيل اللعبة: '+(e.reason&&e.reason.message||e.reason||'خطأ غير معروف')});
-</script>
-<script>
 (()=>{
 const canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id);
 let W=800,H=450,playing=false,last=0,wood=0,stone=0,hp=100,day=8,run=false,attackWait=0,damageWait=0,attackAnim=0,toastTimer;
