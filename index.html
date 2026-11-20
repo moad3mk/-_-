@@ -37,23 +37,23 @@ function resize(){let r=canvas.getBoundingClientRect();W=canvas.width=Math.max(1
 addEventListener('resize',resize);screen.orientation?.addEventListener?.('change',resize);resize();
 function rand(a,b){return a+Math.random()*(b-a)}
 function reset(){wood=stone=0;hp=100;day=8;player.x=player.y=0;objects=[];enemies=[];
-for(let i=0;i<85;i++){let a=rand(0,Math.PI*2),r=rand(100,650);objects.push({x:Math.cos(a)*r,y:Math.sin(a)*r,type:Math.random()<.68?'tree':'rock',life:3})}
+for(let i=0;i<85;i++){let a=rand(0,Math.PI*2),r=i<18?rand(35,150):rand(150,650);objects.push({x:Math.cos(a)*r,y:Math.sin(a)*r,type:Math.random()<.72?'tree':'rock',life:2})}
 for(let i=0;i<7;i++){let a=rand(0,6.28),r=rand(260,540);enemies.push({x:Math.cos(a)*r,y:Math.sin(a)*r,life:3,alive:true})}}
 function project(x,y){let dx=x-player.x,dy=y-player.y;return {x:W/2+(dx-dy)*.72,y:H/2+(dx+dy)*.36}}
 function ellipse(x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}
 function drawTree(o,p){ellipse(p.x,p.y+8,15,7,'#172d20aa');ctx.fillStyle='#65462b';ctx.fillRect(p.x-4,p.y-23,8,28);ellipse(p.x,p.y-32,21,20,'#285b3b');ellipse(p.x-10,p.y-39,13,13,'#36734a');ellipse(p.x+10,p.y-42,13,14,'#1e5035')}
 function drawRock(o,p){ellipse(p.x,p.y+4,14,6,'#172d20aa');ctx.fillStyle='#818c83';ctx.beginPath();ctx.moveTo(p.x-13,p.y);ctx.lineTo(p.x-7,p.y-15);ctx.lineTo(p.x+5,p.y-20);ctx.lineTo(p.x+15,p.y-7);ctx.lineTo(p.x+12,p.y+3);ctx.closePath();ctx.fill()}
 function drawEnemy(e,p){ellipse(p.x,p.y+5,12,5,'#14251c99');ellipse(p.x,p.y-8,10,15,'#a34e42');ellipse(p.x,p.y-23,8,8,'#96735e');ctx.fillStyle='#ff4444';ctx.fillRect(p.x-4,p.y-25,2,2);ctx.fillRect(p.x+3,p.y-25,2,2)}
-function drawPlayer(){let p=project(player.x,player.y);ellipse(p.x,p.y+7,14,6,'#14251c88');ctx.save();ctx.translate(p.x,p.y);ctx.rotate(player.angle);ctx.fillStyle='#315d58';ctx.beginPath();ctx.ellipse(0,-8,11,16,0,0,7);ctx.fill();ctx.fillStyle='#d0a17c';ctx.beginPath();ctx.arc(0,-25,8,0,7);ctx.fill();ctx.fillStyle='#6d5036';ctx.fillRect(-10,-9,5,13);ctx.restore()}
+function drawPlayer(){let p=project(player.x,player.y);ellipse(p.x,p.y+9,20,8,'#14251c99');ctx.save();ctx.translate(p.x,p.y);ctx.rotate(player.angle);ctx.fillStyle='#493a2a';ctx.fillRect(-13,-13,8,22);ctx.fillStyle='#315d58';ctx.beginPath();ctx.roundRect(-12,-29,24,30,8);ctx.fill();ctx.fillStyle='#d0a17c';ctx.beginPath();ctx.arc(0,-39,11,0,Math.PI*2);ctx.fill();ctx.fillStyle='#392b20';ctx.beginPath();ctx.arc(0,-43,11,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#e8c18c';ctx.fillRect(-5,-40,2,2);ctx.fillRect(4,-40,2,2);ctx.fillStyle='#704b2c';ctx.fillRect(-17,-25,6,20);ctx.fillRect(11,-25,6,20);ctx.fillStyle='#253e38';ctx.fillRect(-10,-1,8,8);ctx.fillRect(3,-1,8,8);ctx.restore();ctx.fillStyle='#fff';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('أنت',p.x,p.y-58)}
 function render(){ctx.clearRect(0,0,W,H);let grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#6c9d83');grad.addColorStop(1,'#365d43');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
 for(let i=-8;i<9;i++)for(let j=-8;j<9;j++){let p=project(i*90,j*90);ctx.strokeStyle='#ffffff09';ctx.beginPath();ctx.moveTo(p.x-35,p.y);ctx.lineTo(p.x,p.y+18);ctx.lineTo(p.x+35,p.y);ctx.stroke()}
 let items=objects.filter(o=>o.life>0).map(o=>({o,p:project(o.x,o.y),z:o.x+o.y})).concat(enemies.filter(e=>e.alive).map(e=>({e,p:project(e.x,e.y),z:e.x+e.y})));items.sort((a,b)=>a.z-b.z);
-for(let it of items){if(it.o)it.o.type==='tree'?drawTree(it.o,it.p):drawRock(it.o,it.p);else drawEnemy(it.e,it.p)}
+for(let it of items){if(it.o)it.o.type==='tree'?drawTree(it.o,it.p):drawRock(it.o,it.p);else drawEnemy(it.e,it.p)}let close=nearest();if(close){let q=project(close.x,close.y);ctx.strokeStyle='#ffe28a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(q.x,q.y-18,27,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#ffe28a';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(close.type==='tree'?'🌲 اضغط جمع':'🪨 اضغط جمع',q.x,q.y-53)}
 drawPlayer();
 if(day>18||day<6){ctx.fillStyle='#08142a66';ctx.fillRect(0,0,W,H)}
 }
-function nearest(){let best=null,d=72;for(let o of objects){if(o.life<=0)continue;let n=Math.hypot(o.x-player.x,o.y-player.y);if(n<d){d=n;best=o}}return best}
-function gather(){let o=nearest();if(!o){say('اقترب من شجرة أو صخرة');return}o.life--;if(o.life<=0){if(o.type==='tree'){wood+=3;say('جمعت 3 أخشاب 🪵')}else{stone+=2;say('جمعت حجرين 🪨')}update() }else say('اضغط جمع مرة ثانية')}
+function nearest(){let best=null,d=125;for(let o of objects){if(o.life<=0)continue;let n=Math.hypot(o.x-player.x,o.y-player.y);if(n<d){d=n;best=o}}return best}
+function gather(){let o=nearest();if(!o){say('امشِ باتجاه الشجرة حتى تقترب منها');return}o.life--;if(o.life<=0){if(o.type==='tree'){wood+=3;say('🌲 تكسرت الشجرة! جمعت 3 أخشاب')}else{stone+=2;say('🪨 كسرت الصخرة! جمعت حجرين')}update()}else say(o.type==='tree'?'تضرب الشجرة... ضربة أخيرة!':'تضرب الصخرة... ضربة أخيرة!')}
 function hit(){if(attackWait>0)return;attackWait=.5;let e=enemies.find(e=>e.alive&&Math.hypot(e.x-player.x,e.y-player.y)<75);if(e){e.life--;if(e.life<=0){e.alive=false;say('قضيت على الوحش!')}else say('أصبته!')}else say('مافيش وحش قريب')}
 function say(t){$('hint').textContent=t;clearTimeout(say.t);say.t=setTimeout(()=>$('hint').textContent='استكشف الجزيرة واجمع الموارد وابتعد عن الوحوش',1800)}
 function update(){ $('wood').textContent=wood;$('stone').textContent=stone;$('progress').textContent=wood+' / 5 خشب · '+stone+' / 3 حجر';$('hp').style.width=hp+'%'}
