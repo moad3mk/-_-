@@ -31,13 +31,13 @@ h1{font-size:clamp(28px,6vw,44px);color:#e7c27b;margin:0}p{color:#c4d1c7;font-si
 <script>
 (()=>{
 const canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id);
-let W=800,H=450,playing=false,last=0,wood=0,stone=0,hp=100,day=8,run=false,attackWait=0,damageWait=0,walkTime=0,toastTimer=0;
-const player={x:0,y:0,angle:0},joy={x:0,y:0};const keys={};let objects=[],enemies=[];
+let W=800,H=450,playing=false,last=0,wood=0,stone=0,hp=100,day=8,run=false,attackWait=0,damageWait=0,walkTime=0,attackAnim=0;
+const player={x:0,y:0,vx:0,vy:0,angle:0},joy={x:0,y:0};const keys={};let objects=[],enemies=[];
 function resize(){let r=canvas.getBoundingClientRect();W=canvas.width=Math.max(1,Math.round(r.width*devicePixelRatio));H=canvas.height=Math.max(1,Math.round(r.height*devicePixelRatio));ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);W=r.width;H=r.height}
 addEventListener('resize',resize);screen.orientation?.addEventListener?.('change',resize);resize();
 function rand(a,b){return a+Math.random()*(b-a)}
 function reset(){wood=stone=0;hp=100;day=8;player.x=player.y=0;objects=[];enemies=[];
-for(let i=0;i<95;i++){let a=rand(0,Math.PI*2),r=i<30?rand(45,210):rand(220,700);objects.push({x:Math.cos(a)*r,y:Math.sin(a)*r,type:Math.random()<.72?'tree':'rock',life:1})}
+for(let i=0;i<95;i++){let a=rand(0,Math.PI*2),r=i<30?rand(45,210):rand(220,700);objects.push({x:Math.cos(a)*r,y:Math.sin(a)*r,type:Math.random()<.72?'tree':'rock',life:3,maxLife:3,flash:0})}
 for(let i=0;i<6;i++){let a=rand(0,6.28),r=rand(170,280);enemies.push({x:Math.cos(a)*r,y:Math.sin(a)*r,life:3,alive:true})}}
 function project(x,y){let dx=x-player.x,dy=y-player.y;return {x:W/2+(dx-dy)*.72,y:H/2+(dx+dy)*.36}}
 function ellipse(x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}
@@ -65,12 +65,12 @@ if(day>18||day<6){ctx.fillStyle='#08142a66';ctx.fillRect(0,0,W,H)}
 function nearest(){let best=null,d=160;for(let o of objects){if(o.life<=0)continue;let n=Math.hypot(o.x-player.x,o.y-player.y);if(n<d){d=n;best=o}}return best}
 function gather(){let o=nearest();if(!o){say('اقترب أكثر من الشجرة أو الصخرة — تظهر حولها دائرة ذهبية');return}
 o.life=0;if(o.type==='tree'){wood+=3;say('🪵 تكسرت الشجرة! حصلت على 3 أخشاب')}else{stone+=2;say('🪨 تكسرت الصخرة! حصلت على حجرين')}update()}
-function hit(){if(attackWait>0)return;attackWait=.5;let e=enemies.find(e=>e.alive&&Math.hypot(e.x-player.x,e.y-player.y)<75);if(e){e.life--;if(e.life<=0){e.alive=false;say('قضيت على الوحش!')}else say('أصبته!')}else say('مافيش وحش قريب')}
+function hit(){if(attackWait>0)return;attackWait=.48;attackAnim=.28;let o=nearest();if(o){o.life--;o.flash=.22;if(o.life<=0){if(o.type==='tree'){wood+=3;say('🪵 تكسرت الشجرة! حصلت على 3 أخشاب')}else{stone+=2;say('🪨 تكسرت الصخرة! حصلت على حجرين')}update()}else say('ضربت المورد! باقي '+o.life+' ضربات حتى يتكسر');return}let e=enemies.find(e=>e.alive&&Math.hypot(e.x-player.x,e.y-player.y)<85);if(e){e.life--;if(e.life<=0){e.alive=false;say('قضيت على الوحش!')}else say('أصبت الوحش! باقي '+e.life+' ضربات')}else say('اقترب من شجرة أو وحش واضغط ضرب')}
 function say(t){$('hint').textContent=t;clearTimeout(say.t);say.t=setTimeout(()=>$('hint').textContent='استكشف الجزيرة واجمع الموارد وابتعد عن الوحوش',1800)}
 function update(){ $('wood').textContent=wood;$('stone').textContent=stone;$('progress').textContent=wood+' / 5 خشب · '+stone+' / 3 حجر';$('hp').style.width=hp+'%'}
-function move(dt){let x=joy.x,y=joy.y;if(keys.KeyW||keys.ArrowUp)y-=1;if(keys.KeyS||keys.ArrowDown)y+=1;if(keys.KeyA||keys.ArrowLeft)x-=1;if(keys.KeyD||keys.ArrowRight)x+=1;let n=Math.hypot(x,y);if(n>1){x/=n;y/=n}let fast=(run||keys.ShiftLeft)&&hp>0,speed=fast?210:125;if(n>.05){player.x+=x*speed*dt;player.y+=y*speed*dt;player.angle=Math.atan2(y,x);walkTime+=dt}
+function move(dt){let x=joy.x,y=joy.y;if(keys.KeyW||keys.ArrowUp)y-=1;if(keys.KeyS||keys.ArrowDown)y+=1;if(keys.KeyA||keys.ArrowLeft)x-=1;if(keys.KeyD||keys.ArrowRight)x+=1;let n=Math.hypot(x,y);if(n>1){x/=n;y/=n}let fast=(run||keys.ShiftLeft)&&hp>0,speed=fast?245:150,targetX=x*speed,targetY=y*speed,blend=1-Math.pow(.0008,dt);player.vx+=(targetX-player.vx)*blend;player.vy+=(targetY-player.vy)*blend;player.x+=player.vx*dt;player.y+=player.vy*dt;if(n>.05){player.angle=Math.atan2(y,x);walkTime+=dt*(fast?1.3:1)}else walkTime+=dt*.25;attackWait=Math.max(0,attackWait-dt);attackAnim=Math.max(0,attackAnim-dt);for(let o of objects)o.flash=Math.max(0,o.flash-dt);
 for(let e of enemies){if(!e.alive)continue;let dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);if(d<360&&d>22){e.x+=dx/d*48*dt;e.y+=dy/d*48*dt}if(d<35&&damageWait<=0){hp=Math.max(0,hp-8);damageWait=1;update();say('الوحش هاجمك!')}}
-attackWait=Math.max(0,attackWait-dt);damageWait=Math.max(0,damageWait-dt);day=(day+dt*.08)%24;$('time').textContent=String(Math.floor(day)).padStart(2,'0')+':'+String(Math.floor(day%1*60)).padStart(2,'0');
+damageWait=Math.max(0,damageWait-dt);day=(day+dt*.08)%24;$('time').textContent=String(Math.floor(day)).padStart(2,'0')+':'+String(Math.floor(day%1*60)).padStart(2,'0');
 if(hp<=0){playing=false;$('menu').style.display='flex';$('menu').querySelector('h1').textContent='انتهت الرحلة';$('menu').querySelector('p').textContent='جمعت '+wood+' أخشاب و'+stone+' أحجار. حاول مرة ثانية.';$('start').textContent='إعادة اللعب'}}
 function frame(t){let dt=Math.min((t-last)/1000||0,.04);last=t;if(playing)move(dt);render();requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
