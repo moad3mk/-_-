@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#101b1c"><title>LAST HOPE: SURVIVAL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101b1c;color:#fff;font-family:Cairo,Arial,sans-serif;touch-action:none}canvas{display:block}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:3}.top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.brand{font-weight:900;letter-spacing:2px;font-size:clamp(14px,3vw,22px);text-shadow:0 2px 10px #000}.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill{background:#071314c9;border:1px solid #ffffff28;border-radius:12px;padding:6px 10px;font-size:12px;backdrop-filter:blur(8px)}.bars{position:absolute;top:58px;right:12px;width:160px;background:#071314c9;border:1px solid #ffffff25;border-radius:12px;padding:8px}.barline{display:flex;align-items:center;gap:6px;font-size:11px;margin:3px 0}.track{height:7px;background:#ffffff20;border-radius:9px;flex:1;overflow:hidden}.fill{height:100%;width:100%;border-radius:9px;transition:width .2s}.health{background:#e85c58}.stamina{background:#e7c45b}.objective{position:absolute;top:58px;left:12px;background:#071314c9;border:1px solid #ffffff25;border-radius:12px;padding:9px 12px;font-size:12px;max-width:210px}.objective b{color:#f0d58b}.hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:#071314bb;border:1px solid #ffffff22;border-radius:20px;padding:7px 15px;font-size:11px;white-space:nowrap}
+#mobile{position:fixed;inset:0;z-index:4;pointer-events:none}.stick{position:absolute;bottom:28px;left:25px;width:118px;height:118px;border-radius:50%;background:#ffffff16;border:2px solid #ffffff35;pointer-events:auto;touch-action:none}.nub{position:absolute;width:48px;height:48px;left:33px;top:33px;border-radius:50%;background:#ffffff55;border:2px solid #ffffff90}.actions{position:absolute;bottom:28px;right:20px;display:flex;gap:10px;align-items:flex-end;pointer-events:auto}.act{border:1px solid #ffffff55;background:#102a2acc;color:#fff;border-radius:50%;width:60px;height:60px;font:700 11px Cairo;box-shadow:0 5px 18px #0007;touch-action: manipulation}.act.big{width:72px;height:72px;background:#8d4a2dcc}.act:active{transform:scale(.94);background:#d08b42}.desktop{position:absolute;bottom:20px;right:50%;transform:translateX(50%);font-size:11px;color:#ffffffaa}
+#toast{position:fixed;z-index:8;top:27%;left:50%;transform:translate(-50%,-50%);background:#071314ed;border:1px solid #e6c87988;border-radius:14px;padding:12px 20px;display:none;text-align:center;pointer-events:none}
+#screen{position:fixed;inset:0;z-index:10;background:linear-gradient(145deg,#071314ee,#152b2bcc),url('') center/cover;display:flex;align-items:center;justify-content:center;padding:22px;text-align:center}.panel{width:min(480px,100%);padding:28px 22px;border:1px solid #ffffff2b;border-radius:24px;background:#0a1718eF;box-shadow:0 25px 80px #0009}.logo{font-size:clamp(28px,8vw,48px);font-weight:900;line-height:1.1;color:#f0d58b;letter-spacing:2px}.sub{color:#a8b8b1;margin:12px 0 22px;font-size:13px}.start{border:0;border-radius:13px;background:linear-gradient(135deg,#d69b4e,#8c512a);color:white;font:900 16px Cairo;padding:12px 30px;width:100%;cursor:pointer}.small{font-size:11px;color:#849994;margin-top:15px;line-height:1.9}
+@media(min-width:800px){.stick,.actions{opacity:.78}.desktop{display:block}}@media(max-width:500px){.bars{top:88px}.objective{top:88px;max-width:145px;font-size:10px}.hint{bottom:158px}.brand{font-size:13px}.pill{font-size:10px;padding:5px 7px}}
+</style>
+</head>
+<body>
+<div id="hud">
+ <div class="top"><div class="brand">LAST HOPE <span style="color:#d9a85c">: SURVIVAL</span></div><div class="stats"><div class="pill">🪵 <span id="wood">0</span></div><div class="pill">🪨 <span id="stone">0</span></div><div class="pill">☀️ <span id="clock">08:00</span></div></div></div>
+ <div class="bars"><div class="barline">❤️ الصحة<div class="track"><div class="fill health" id="hp"></div></div></div><div class="barline">⚡ الطاقة<div class="track"><div class="fill stamina" id="sp"></div></div></div></div>
+ <div class="objective"><b>مهمتك الأولى</b><br>اجمع 5 أخشاب و3 أحجار<br><span id="quest">0 / 5 خشب · 0 / 3 حجر</span></div>
+ <div class="hint" id="hint">استكشف الجزيرة واجمع الموارد لتبقى حياً</div>
+</div>
+<div id="mobile"><div class="stick" id="stick"><div class="nub" id="nub"></div></div><div class="actions"><button class="act" id="collect">جمع</button><button class="act big" id="hit">ضرب</button><button class="act" id="run">ركض</button></div><div class="desktop">WASD للحركة · Shift للركض · E للجمع · Space للضرب</div></div>
+<div id="toast"></div>
+<div id="screen"><div class="panel"><div class="logo">LAST HOPE</div><div style="font-weight:700;letter-spacing:4px;color:#d8a65c">SURVIVAL</div><p class="sub">جزيرة مهجورة. موارد محدودة. شيء ما يتحرك بين الأشجار...<br>هل تقدر تصمد؟</p><button class="start" id="start">ابدأ المغامرة</button><div class="small">نسخة تجريبية · عالم ثلاثي الأبعاد<br>يفضل اللعب بالوضع الأفقي للحصول على أفضل تجربة</div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+if(!window.THREE){$('start').textContent='تعذر تحميل اللعبة — تحقق من الإنترنت';$('start').disabled=true;return}
+let scene,camera,renderer,player,clock3=new THREE.Clock(),started=false,hp=100,stamina=100,wood=0,stone=0,day=8,attackCooldown=0,damageCooldown=0;
+const keys={},resources=[],enemies=[],obstacles=[],world=70;
+const mat=(color,rough=.9)=>new THREE.MeshStandardMaterial({color,roughness:rough});
+const groundMat=mat(0x496d48),trunkMat=mat(0x60452d),leafMat=mat(0x28583c),rockMat=mat(0x777d78),skinMat=mat(0xd0a17c),shirtMat=mat(0x345c58),enemyMat=mat(0x9b5144);
+function box(w,h,d,m,x,y,z){let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);scene.add(o);return o}
+function sphere(r,m,x,y,z){let o=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),m);o.position.set(x,y,z);scene.add(o);return o}
+function toast(s){$('toast').textContent=s;$('toast').style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').style.display='none',1700)}
+function init(){
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x9bc4c5);scene.fog=new THREE.Fog(0x9bc4c5,28,90);
+ camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,180);
+ renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xcceaff,0x34432c,2));
+ const sun=new THREE.DirectionalLight(0xffe0aa,2.1);sun.position.set(-25,40,18);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-45;sun.shadow.camera.right=45;sun.shadow.camera.top=45;sun.shadow.camera.bottom=-45;scene.add(sun);
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(180,180),groundMat);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+ // beach ring
+ const beach=new THREE.Mesh(new THREE.RingGeometry(31,34,90),mat(0xc5ae79));beach.rotation.x=-Math.PI/2;beach.position.y=.025;scene.add(beach);
+ // distant ocean
+ const ocean=new THREE.Mesh(new THREE.PlaneGeometry(500,500),mat(0x347c91));ocean.rotation.x=-Math.PI/2;ocean.position.y=-.45;scene.add(ocean);
+ // scattered forest and harvestable trees
+ for(let i=0;i<105;i++){let a=Math.random()*Math.PI*2,r=8+Math.random()*25,x=Math.cos(a)*r,z=Math.sin(a)*r;if(Math.hypot(x,z)<5)continue;makeTree(x,z,i%4===0)}
+ for(let i=0;i<38;i++){let a=Math.random()*6.28,r=7+Math.random()*25,x=Math.cos(a)*r,z=Math.sin(a)*r;makeRock(x,z,i%3===0)}
+ // simple abandoned shelter
+ const woodmat=mat(0x765333);box(7,.35,5,woodmat,-10,.2,-12);for(let x of [-13,-7])for(let z of [-14,-10])box(.25,3,.25,woodmat,x,1.6,z);
+ const roof=box(7,.25,5,mat(0x4c4132),-10,3.2,-12);roof.rotation.z=.05;
+ // player
+ player=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(.48,.85,4,8),shirtMat);body.position.y=1.05;body.castShadow=true;player.add(body);
+ const head=sphere(.32,skinMat,0,1.95,0);player.add(head);
+ const pack=box(.55,.65,.3,mat(0x8b633d),0,1.15,.48);player.add(pack);
+ player.position.set(0,0,0);scene.add(player);
+ for(let i=0;i<7;i++){let a=Math.random()*6.28,r=19+Math.random()*10;makeEnemy(Math.cos(a)*r,Math.sin(a)*r)}
+ camera.position.set(0,5,8);
+ }
+function makeTree(x,z,harvest){let g=new THREE.Group();let t=new THREE.Mesh(new THREE.CylinderGeometry(.22,.34,2.7,7),trunkMat);t.position.y=1.35;t.castShadow=true;g.add(t);for(let j=0;j<3;j++){let l=new THREE.Mesh(new THREE.ConeGeometry(1.35-j*.2,2.2,7),leafMat);l.position.y=2.7+j*.65;l.castShadow=true;g.add(l)}g.position.set(x,0,z);scene.add(g);obstacles.push({x,z,r:.8});if(harvest)resources.push({type:'wood',x,z,mesh:g,hp:3})}
+function makeRock(x,z,harvest){let g=new THREE.Group();let m=new THREE.Mesh(new THREE.DodecahedronGeometry(.8,0),rockMat);m.scale.set(1.2,.75,.9);m.position.y=.45;m.rotation.set(Math.random(),Math.random(),Math.random());m.castShadow=true;g.add(m);g.position.set(x,0,z);scene.add(g);if(harvest)resources.push({type:'stone',x,z,mesh:g,hp:3})}
+function makeEnemy(x,z){let g=new THREE.Group();let b=new THREE.Mesh(new THREE.CapsuleGeometry(.43,.75,3,7),enemyMat);b.position.y=.9;b.castShadow=true;g.add(b);let h=sphere(.27,mat(0x9e806c),0,1.75,0);g.add(h);let eyeMat=mat(0xff2929);for(let x1 of [-.11,.11]){let e=sphere(.045,eyeMat,x1,1.8,-.23);g.add(e)}g.position.set(x,0,z);scene.add(g);enemies.push({mesh:g,hp:3,alive:true,hit:0})}
+function nearestResource(){let best=null,d=3.6;for(const r of resources){if(r.hp<=0)continue;let n=Math.hypot(player.position.x-r.x,player.position.z-r.z);if(n<d){d=n;best=r}}return best}
+function collect(){let r=nearestResource();if(!r){toast('اقترب من شجرة أو صخرة أولاً');return}r.hp--;if(r.hp<=0){r.mesh.visible=false;if(r.type==='wood')wood+=3;else stone+=2;updateUI();toast(r.type==='wood'?'جمعت 3 أخشاب 🪵':'جمعت حجرين 🪨')}else toast('تجمع المورد... ضربة أخرى!')}
+function hit(){if(attackCooldown>0)return;attackCooldown=.55;let target=null,d=3.2;for(const e of enemies){if(!e.alive)continue;let n=player.position.distanceTo(e.mesh.position);if(n<d){d=n;target=e}}if(target){target.hp--;target.hit=.2;if(target.hp<=0){target.alive=false;target.mesh.visible=false;toast('تم القضاء على العدو!')}else toast('أصبته!')}else toast('لا يوجد عدو قريب')}
+function updateUI(){$('wood').textContent=wood;$('stone').textContent=stone;$('hp').style.width=hp+'%';$('sp').style.width=stamina+'%';$('quest').textContent=wood+' / 5 خشب · '+stone+' / 3 حجر';if(wood>=5&&stone>=3)$('hint').textContent='ممتاز! صنعت لنفسك فرصة للنجاة — استمر في الاستكشاف'}
+function moveVector(){let x=0,z=0;if(keys.KeyW||keys.ArrowUp)z-=1;if(keys.KeyS||keys.ArrowDown)z+=1;if(keys.KeyA||keys.ArrowLeft)x-=1;if(keys.KeyD||keys.ArrowRight)x+=1;x+=joy.x;z+=joy.y;let l=Math.hypot(x,z);return l>1?{x:x/l,z:z/l}:{x,z}}
+const joy={x:0,y:0};let dragging=false;
+function setupTouch(){let s=$('stick'),n=$('nub');function set(e){let r=s.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),len=Math.hypot(dx,dy),max=40;if(len>max){dx=dx/len*max;dy=dy/len*max}joy.x=dx/max;joy.y=dy/max;n.style.transform='translate('+dx+'px,'+dy+'px)'}s.addEventListener('pointerdown',e=>{dragging=true;s.setPointerCapture(e.pointerId);set(e)});s.addEventListener('pointermove',e=>{if(dragging)set(e)});['pointerup','pointercancel'].forEach(v=>s.addEventListener(v,()=>{dragging=false;joy.x=joy.y=0;n.style.transform=''}));$('collect').onclick=collect;$('hit').onclick=hit;$('run').onclick=()=>{keys.ShiftLeft=!keys.ShiftLeft;$('run').style.background=keys.ShiftLeft?'#a36b32':'#102a2acc'};}
+function update(dt){if(!started)return;let v=moveVector(),moving=Math.hypot(v.x,v.z)>.05,fast=(keys.ShiftLeft||keys.ShiftRight)&&stamina>1&&moving;let speed=fast?8:4.5;if(fast)stamina=Math.max(0,stamina-24*dt);else stamina=Math.min(100,stamina+13*dt);if(moving){let dx=v.x,dz=v.z;player.position.x+=dx*speed*dt;player.position.z+=dz*speed*dt;player.rotation.y=Math.atan2(dx,dz);player.position.x=THREE.MathUtils.clamp(player.position.x,-31,31);player.position.z=THREE.MathUtils.clamp(player.position.z,-31,31)}
+ for(const o of obstacles){let dx=player.position.x-o.x,dz=player.position.z-o.z,d=Math.hypot(dx,dz);if(d<1.15&&d>.001){player.position.x=o.x+dx/d*1.15;player.position.z=o.z+dz/d*1.15}}
+ attackCooldown=Math.max(0,attackCooldown-dt);damageCooldown=Math.max(0,damageCooldown-dt);
+ for(const e of enemies){if(!e.alive)continue;let dx=player.position.x-e.mesh.position.x,dz=player.position.z-e.mesh.position.z,d=Math.hypot(dx,dz);if(d<19&&d>1.2){e.mesh.position.x+=dx/d*1.65*dt;e.mesh.position.z+=dz/d*1.65*dt;e.mesh.rotation.y=Math.atan2(dx,dz)}if(d<1.5&&damageCooldown<=0){hp=Math.max(0,hp-9);damageCooldown=1.05;toast('العدو هاجمك!')} }
+ day+=dt*.12;if(day>=24)day=0;let night=day>18||day<6;scene.background.set(night?0x101b32:0x9bc4c5);scene.fog.color.set(night?0x101b32:0x9bc4c5);$('clock').textContent=String(Math.floor(day)).padStart(2,'0')+':'+String(Math.floor((day%1)*60)).padStart(2,'0');
+ camera.position.lerp(new THREE.Vector3(player.position.x,player.position.y+5.2,player.position.z+7.5),1-Math.pow(.001,dt));camera.lookAt(player.position.x,1,player.position.z);
+ $('hp').style.width=hp+'%';$('sp').style.width=stamina+'%';if(hp<=0){started=false;$('screen').style.display='flex';$('screen').querySelector('.logo').textContent='انتهت الرحلة';$('screen').querySelector('.sub').innerHTML='لقد سقطت في الجزيرة...<br>جمعت '+wood+' أخشاب و'+stone+' أحجار.';$('start').textContent='حاول مرة ثانية'}
+}
+function loop(){requestAnimationFrame(loop);let dt=Math.min(clock3.getDelta(),.04);update(dt);if(renderer)renderer.render(scene,camera)}
+$('start').onclick=()=>{if(!scene)init();if(hp<=0){hp=100;stamina=100;wood=stone=0;day=8;player.position.set(0,0,0);enemies.forEach(e=>{e.alive=true;e.hp=3;e.mesh.visible=true;e.mesh.position.set((Math.random()-.5)*45,0,(Math.random()-.5)*45)});resources.forEach(r=>{r.hp=3;r.mesh.visible=true})}started=true;$('screen').style.display='none';updateUI();toast('أهلاً بك في الجزيرة... انتبه للأعداء!');clock3.getDelta()};
+addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyE')collect();if(e.code==='Space'){e.preventDefault();hit()}});
+addEventListener('keyup',e=>keys[e.code]=false);
+addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}});
+setupTouch();loop();
+})();
+</script>
+</body></html>
