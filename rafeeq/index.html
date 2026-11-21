@@ -34,13 +34,13 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}button:focus-visible{o
 const defaults={name:"لوز",pet:"🐶",petType:"dog",coins:30,level:1,xp:0,stats:{hunger:78,happy:82,clean:88,energy:76},missions:{feed:0,play:0,bath:0,claimed:false},dayKey:new Date().toLocaleDateString("en-CA"),streak:0,lastVisit:"",friendship:0,adventureDay:"",last:Date.now(),sparkle:false};
 let s;try{s={...defaults,...JSON.parse(localStorage.getItem("rafeeq-save")||"{}")};s.stats={...defaults.stats,...(s.stats||{})};s.missions={...defaults.missions,...(s.missions||{})};s.streak=s.streak||0;s.friendship=s.friendship||0}catch(e){s={...defaults,stats:{...defaults.stats},missions:{...defaults.missions}}}
 const $=id=>document.getElementById(id);const clamp=n=>Math.max(0,Math.min(100,Math.round(n)));
-function dayKey(){return new Date().toLocaleDateString("en-CA")}
+function dayKey(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function save(){s.last=Date.now();localStorage.setItem("rafeeq-save",JSON.stringify(s))}
 function addCoins(n){s.coins+=n;const pop=document.createElement("span");pop.className="coin-pop";pop.textContent="+"+n+" 🪙";document.querySelector(".coins").appendChild(pop);setTimeout(()=>pop.remove(),1200)}
 function checkNewDay(){
  const today=dayKey();
  if(s.dayKey!==today){s.missions={feed:0,play:0,bath:0,claimed:false};s.dayKey=today;toast("🌅 مهام جديدة وصلت!");}
- if(s.lastVisit!==today){const yesterday=new Date(Date.now()-86400000).toLocaleDateString("en-CA");s.streak=s.lastVisit===yesterday?s.streak+1:1;s.lastVisit=today;const bonus=Math.min(5+s.streak*2,25);addCoins(bonus);say("نورت من جديد! خديت مكافأة الدخول اليومية 🎁");}
+ if(s.lastVisit!==today){const yesterday=dayKey(new Date(Date.now()-86400000));s.streak=s.lastVisit===yesterday?s.streak+1:1;s.lastVisit=today;const bonus=Math.min(5+s.streak*2,25);addCoins(bonus);say("نورت من جديد! خديت مكافأة الدخول اليومية 🎁");}
 }
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>$("toast").classList.remove("show"),1900)}
 function say(t){$("bubble").textContent=t}
@@ -51,7 +51,7 @@ $("pet").textContent=s.pet;$("pet").classList.toggle("sleep",s.stats.energy<20);
 const avg=Object.values(s.stats).reduce((a,b)=>a+b,0)/4;let mood=avg>75?"😄 ممتاز":avg>45?"😊 مبسوط":avg>20?"🥺 محتاجك":"😢 تعبان";$("moodTag").textContent=mood;
 const labels=[["hunger","🍎 الشبع"],["happy","💚 السعادة"],["clean","🫧 النظافة"],["energy","⚡ الطاقة"]];
 $("stats").innerHTML=labels.map(([k,l])=>'<div class="stat"><div class="stat-top"><span>'+l+'</span><b>'+s.stats[k]+'%</b></div><div class="bar"><div class="fill" style="width:'+s.stats[k]+'%"></div></div></div>').join("");
-$("feedMission").textContent=s.missions.feed+"/1";$("playMission").textContent=s.missions.play+"/1";$("bathMission").textContent=s.missions.bath+"/1";$("dailyBox").style.display=s.missions.claimed?"none":"grid";$("friendLevel").textContent="💛 "+s.friendship+" نقطة صداقة";$("friendText").textContent=s.friendship>=100?"رفيقك يعتبرك أعز صديق! 🥹":"باقي "+Math.max(0,100-s.friendship)+" نقطة لرتبة أعز صديق.";const doneToday=s.adventureDay===dayKey();$("adventure").disabled=doneToday;$("adventure").textContent=doneToday?"ارجع بكرة 🌙":"ابدأ المغامرة";$("adventureText").textContent=doneToday?"خلصت مغامرة اليوم، بكرة رحلة جديدة!":"اخرج في جولة واكتشف مفاجأة وخذ مكافأة!";
+$("feedMission").textContent=s.missions.feed+"/1";$("playMission").textContent=s.missions.play+"/1";$("bathMission").textContent=s.missions.bath+"/1";$("dailyBox").style.display=s.missions.claimed?"none":"grid";$("friendLevel").textContent="💛 "+s.friendship+" نقطة صداقة";$("friendText").textContent="🔥 سلسلة دخولك: "+s.streak+" يوم · "+(s.friendship>=100?"رفيقك يعتبرك أعز صديق! 🥹":"باقي "+Math.max(0,100-s.friendship)+" نقطة لرتبة أعز صديق.");const doneToday=s.adventureDay===dayKey();$("adventure").disabled=doneToday;$("adventure").textContent=doneToday?"ارجع بكرة 🌙":"ابدأ المغامرة";$("adventureText").textContent=doneToday?"خلصت مغامرة اليوم، بكرة رحلة جديدة!":"اخرج في جولة واكتشف مفاجأة وخذ مكافأة!";
 $("claim").disabled=!(s.missions.feed&&s.missions.play&&s.missions.bath)&&s.missions.claimed===false?true:s.missions.claimed;
 document.querySelectorAll("[data-buy]").forEach(b=>{let cost=b.dataset.buy==="sparkle"?40:b.dataset.buy==="food"?8:25;b.disabled=s.coins<cost||(b.dataset.buy==="sparkle"&&s.sparkle)});
 }
