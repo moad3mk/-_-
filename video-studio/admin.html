@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة NEXORA SHOP</title>
+<style>
+:root{color-scheme:dark;--bg:#080e19;--panel:#111c2e;--line:#263750;--muted:#91a1bb;--cyan:#54d9e8;--blue:#719cff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#14233c 0,#080e19 55%);color:#eef4ff;font-family:Arial,Tahoma,sans-serif;min-height:100vh}
+header{position:sticky;top:0;background:#0b1424ed;border-bottom:1px solid var(--line);padding:16px clamp(14px,4vw,38px);display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:2}
+h1{font-size:clamp(19px,4vw,28px);margin:0}header p{margin:5px 0 0;color:var(--muted);font-size:12px}
+button,select{font:inherit;border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:#17263d;color:#eef4ff;cursor:pointer}button.primary{background:linear-gradient(120deg,#4dd8e7,#7a9cff);color:#07101d;border:0;font-weight:bold}
+main{width:min(1100px,calc(100% - 28px));margin:26px auto 60px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}.stat,.order,.empty{background:#111c2e;border:1px solid var(--line);border-radius:16px;padding:17px}.stat small{display:block;color:var(--muted);margin-bottom:8px}.stat b{font-size:26px}
+.section{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:20px 0 12px}.section h2{font-size:19px;margin:0}.orders{display:grid;gap:12px}.order-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.order-top small,.muted{color:var(--muted);font-size:12px}.order p{font-size:14px;line-height:1.6;margin:9px 0}.field{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.field span{font-size:13px;color:#cbd6e9}.empty{text-align:center;color:var(--muted);padding:35px}
+@media(max-width:520px){.stats{gap:8px}.stat{padding:12px}.stat b{font-size:22px}.stat small{font-size:11px}header{align-items:flex-start}}
+</style></head>
+<body>
+<header><div><h1>لوحة إدارة NEXORA</h1><p>إدارة الطلبات وحالاتها</p></div><div style="display:flex;gap:8px"><button id="refresh">تحديث</button><button class="primary" onclick="location.href='./'">رجوع للمتجر</button></div></header>
+<main>
+<div class="stats"><div class="stat"><small>كل الطلبات</small><b id="total">0</b></div><div class="stat"><small>طلبات جديدة</small><b id="fresh">0</b></div><div class="stat"><small>مكتملة</small><b id="done">0</b></div></div>
+<div class="section"><h2>الطلبات الواردة</h2><span class="muted">تتحدث البيانات من نفس المتصفح</span></div>
+<div class="orders" id="orders"></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function read(){try{return JSON.parse(localStorage.getItem("nexora_orders")||"[]")}catch(e){return []}}
+function render(){const a=read();$("total").textContent=a.length;$("fresh").textContent=a.filter(x=>x.status==="جديد").length;$("done").textContent=a.filter(x=>x.status==="مكتمل").length;
+$("orders").innerHTML=a.length?a.map(o=>'<article class="order"><div class="order-top"><b>'+esc(o.product)+' · '+esc(o.price)+' د.ل</b><small>'+esc(o.id)+' | '+esc(o.created)+'</small></div><p>الاسم: '+esc(o.customer)+' · معرف اللعبة: '+esc(o.gameId)+'</p><p>التواصل: '+esc(o.contact)+'</p>'+(o.notes?'<p>ملاحظات: '+esc(o.notes)+'</p>':'')+'<label class="field"><span>حالة الطلب</span><select data-id="'+esc(o.id)+'">'+["جديد","قيد التنفيذ","مكتمل","ملغي"].map(v=>'<option '+(o.status===v?'selected':'')+'>'+v+'</option>').join("")+'</select></label></article>').join(""):'<div class="empty">مافيش طلبات توا.</div>';
+document.querySelectorAll("[data-id]").forEach(sel=>sel.onchange=()=>{const all=read(),item=all.find(x=>x.id===sel.dataset.id);if(item){item.status=sel.value;localStorage.setItem("nexora_orders",JSON.stringify(all));render()}})}
+$("refresh").onclick=render;render();
+</script></body></html>
