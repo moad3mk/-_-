@@ -113,3 +113,15 @@ with check (bucket_id='avatars' and (storage.foldername(name))[1]=auth.uid()::te
 -- السماح بتعديل الاسم والصورة فقط ومنع العضو من تغيير رتبته
 revoke update on public.profiles from authenticated;
 grant update (username, avatar_url) on public.profiles to authenticated;
+
+
+create or replace function public.admin_set_role(target_user uuid, new_role text)
+returns void language plpgsql security definer set search_path=public
+as $$
+begin
+ if not public.is_admin() then raise exception 'غير مصرح'; end if;
+ if new_role not in ('عضو','VIP','مشرف','مدير') then raise exception 'رتبة غير صالحة'; end if;
+ update public.profiles set role=new_role where id=target_user;
+end;
+$$;
+grant execute on function public.admin_set_role(uuid,text) to authenticated;
