@@ -23,6 +23,7 @@ render().catch(e=>{$("orders").innerHTML='<div class="empty">تعذر تحميل
 loadSupportTickets().catch(e=>{$("supportTickets").innerHTML='<div class="empty">تعذر تحميل التذاكر: '+esc(e.message||e)+'</div>';});
 }
 function init(){let x=null;try{x=JSON.parse(localStorage.getItem("sb-xwcukpzibwogtovatxrm-auth-token")||"null")}catch(e){}const u=x&&x.user;if(u&&u.id==="944f2935-7efb-4579-88d3-35a71bf29f79"&&x.access_token){enterOwner(u);return}location.replace("./?returnAdmin=1")}
+try{init();}catch(e){$("message").textContent="تعذر تشغيل لوحة الإدارة: "+(e.message||e);console.error(e);}
 
 function showLogin(message){$("message").textContent=message||"لا يمكن الدخول بدون حساب وصلاحية إدارة."; $("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");$("refresh").classList.add("hidden");}
 
@@ -58,5 +59,4 @@ $("customRoleForm").onsubmit=async e=>{e.preventDefault();const roleName=$("cust
 $("checkModeration").onclick=async()=>{const username=$("moderationUsername").value.trim();if(!username){$("moderationMessage").textContent="اكتب اسم العضو أولاً.";return;}const q=await sb.rpc("admin_moderation_status",{target_username:username});if(q.error){$("moderationMessage").textContent="تعذر جلب الحالة: "+q.error.message;return;}const d=q.data||{};$("moderationMessage").textContent="حالة "+username+": "+d.status+(d.until?" · ينتهي: "+new Date(d.until).toLocaleString("ar-LY"):"")+(d.reason?" · السبب: "+d.reason:"");};
 $("moderationAction").onchange=()=>{$("moderationDurationWrap").style.display=$("moderationAction").value==="timeout"?"block":"none";};$("moderationAction").onchange();$("moderationForm").onsubmit=async e=>{e.preventDefault();const action=$("moderationAction").value;const username=$("moderationUsername").value.trim();const minutes=action==="timeout"?Number($("moderationDuration").value):null;if(action==="timeout"&&(!Number.isInteger(minutes)||minutes<1||minutes>10080)){$("moderationMessage").textContent="المدة من دقيقة إلى 7 أيام.";return;}const q=await sb.rpc("admin_moderate_by_username",{target_username:username,action,minutes,why:$("moderationReason").value.trim()});$("moderationMessage").textContent=q.error?"تعذر التنفيذ: "+q.error.message:(action==="ban"?"تم حظر العضو نهائياً من الدردشة.":action==="timeout"?"تم تطبيق التايم على العضو.":"تم فك الحظر أو التايم.");};const permissionList=[["admin_access","دخول إلى لوحة إدارة"],["delete_messages","حذف رسائل شات"],["ban_members","حظر عضو"],["timeout_members","تايم عضو"],["manage_roles","إدارة الرتب"]];$("permissionChoices").innerHTML=permissionList.map(([v,t])=>'<label><input type="checkbox" data-permission value="'+v+'"> '+t+'</label>').join("");
 }
-init();
 </script></body></html>
