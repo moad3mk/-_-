@@ -109,3 +109,7 @@ drop policy if exists "Users update own avatar" on storage.objects;
 create policy "Users update own avatar" on storage.objects for update to authenticated
 using (bucket_id='avatars' and (storage.foldername(name))[1]=auth.uid()::text)
 with check (bucket_id='avatars' and (storage.foldername(name))[1]=auth.uid()::text);
+
+-- السماح بتعديل الاسم والصورة فقط ومنع العضو من تغيير رتبته
+revoke update on public.profiles from authenticated;
+grant update (username, avatar_url) on public.profiles to authenticated;
