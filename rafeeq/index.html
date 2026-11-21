@@ -51,6 +51,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}button:focus-visible{o
 <script>
 (()=>{
 const defaults={name:"لوز",pet:"🐶",petType:"dog",coins:30,level:1,xp:0,stats:{hunger:78,happy:82,clean:88,energy:76},missions:{feed:0,play:0,bath:0,claimed:false},dayKey:new Date().toLocaleDateString("en-CA"),streak:0,lastVisit:"",friendship:0,adventureDay:"",last:Date.now(),sparkle:false};
+const $=id=>document.getElementById(id);const clamp=n=>Math.max(0,Math.min(100,Math.round(n)));
 let s;try{s={...defaults,...JSON.parse(localStorage.getItem("rafeeq-save")||"{}")};s.stats={...defaults.stats,...(s.stats||{})};s.missions={...defaults.missions,...(s.missions||{})};s.streak=s.streak||0;s.friendship=s.friendship||0}catch(e){s={...defaults,stats:{...defaults.stats},missions:{...defaults.missions}}}
 
 
@@ -62,7 +63,7 @@ function placeTarget(){cells.forEach(c=>{c.textContent="";c.classList.remove("hi
 function tapCell(i){if(!gameActive)return;if(i===target){const kind=cells[i].dataset.kind;if(kind==="danger"){gameScore=Math.max(0,gameScore-2);combo=0;$("gameMessage").textContent="صخرة! نقصنا نقطتين 😵"}else{combo++;gameScore+=kind==="gold"?3:1;if(combo>0&&combo%5===0)gameScore+=2;$("gameMessage").textContent=kind==="gold"?"فراشة ذهبية! +3 ⭐":combo%5===0?"كومبو! +3 نقاط 🔥":["صيد ممتاز! 🦋","سريعة! ✨","واحدة ثانية! 🔥","برافو عليك! 💚"][Math.floor(Math.random()*4)]} $("gameScore").textContent=gameScore;cells[i].classList.add("hit");placeTarget()}else{$("gameMessage").textContent="مش هنا! ركّز على الرمز 🧐";combo=0;}}
 function finishGame(){gameActive=false;clearInterval(gameTimer);target=-1;cells.forEach(c=>{c.textContent="";c.disabled=true});const reward=gameScore>=25?20:gameScore>=15?12:gameScore>=8?6:gameScore>=3?2:0;if(gameScore>best){best=gameScore;localStorage.setItem("rafeeq-best",best)}if(reward){addCoins(reward);$("coins").textContent=s.coins}save();$("gameBest").textContent=best;$("gameMessage").textContent="خلص الوقت! جبت "+gameScore+" نقطة وخديت "+reward+" عملة 🪙";$("gameStart").disabled=false;$("gameStart").textContent="العب من جديد 🔁"}
 $("gameStart").addEventListener("click",()=>{if(gameActive)return;gameScore=0;combo=0;gameLeft=30;gameActive=true;$("gameScore").textContent="0";$("gameTime").textContent="30";$("gameMessage").textContent="يلا! الحق الفراشات 🦋";$("gameStart").disabled=true;$("gameStart").textContent="اللعبة شغالة...";cells.forEach(c=>c.disabled=false);placeTarget();gameTimer=setInterval(()=>{gameLeft--;$("gameTime").textContent=gameLeft;if(gameLeft<=0)finishGame()},1000)});
-const $=id=>document.getElementById(id);const clamp=n=>Math.max(0,Math.min(100,Math.round(n)));
+
 function dayKey(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function save(){s.last=Date.now();localStorage.setItem("rafeeq-save",JSON.stringify(s))}
 function addCoins(n){s.coins+=n;const pop=document.createElement("span");pop.className="coin-pop";pop.textContent="+"+n+" 🪙";document.querySelector(".coins").appendChild(pop);setTimeout(()=>pop.remove(),1200)}
