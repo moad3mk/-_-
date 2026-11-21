@@ -107,3 +107,64 @@ for delete to authenticated using (public.has_permission('delete_messages'));
 -- Chat permissions are granted only to the selected custom role.
 
 grant delete on public.messages to authenticated;
+
+
+-- إصلاح إدارة الحظر بالاسم وإضافة أوامر الدردشة المحمية
+create or replace function public.admin_moderate_by_username(target_username text, action text, minutes integer default null, why text default '')
+returns void language plpgsql security definer set search_path=public
+as $$
+declare target_id uuid;
+begin
+  if action='ban' and not public.has_permission('ban_members') then raise exception 'لا تملك صلاحية الحظر'; end if;
+  if action='timeout' and not public.has_permission('timeout_members') then raise exception 'لا تملك صلاحية التايم'; end if;
+  if action='unban' and not public.has_permission('ban_members') then raise exception 'لا تملك صلاحية فك الحظر'; end if;
+  select id into target_id from public.profiles where lower(username)=lower(trim(target_username)) limit 1;
+  if target_id is null then raise exception 'لم نعثر على عضو بهذا الاسم'; end if;
+  if target_id=auth.uid() then raise exception 'لا يمكنك تطبيق الإجراء على حسابك'; end if;
+  if action='ban' then
+    insert into public.member_moderation(user_id,banned,timeout_until,reason,updated_at)
+    values(target_id,true,null,why,now())
+    on conflict(user_id) do update set banned=true,timeout_until=null,reason=excluded.reason,updated_at=now();
+  elsif action='timeout' then
+    if minutes is null or minutes<1 or minutes>10080 then raise exception 'مدة التايم من دقيقة إلى 7 أيام'; end if;
+    insert into public.member_moderation(user_id,banned,timeout_until,reason,updated_at)
+    values(target_id,false,now()+make_interval(mins=>minutes),why,now())
+    on conflict(user_id) do update set banned=false,timeout_until=excluded.timeout_until,reason=excluded.reason,updated_at=now();
+  elsif action='unban' then
+    update public.member_moderation set banned=false,timeout_until=null,reason='',updated_at=now() where user_id=target_id;
+  else raise exception 'إجراء غير معروف'; end if;
+end;
+$$;
+grant execute on function public.admin_moderate_by_username(text,text,integer,text) to authenticated;
+
+create or replace function public.nexora_chat_command(cmd text, target_username text default null, role_names text[] default null, amount integer default null)
+returns text language plpgsql security definer set search_path=public
+as $$
+declare target_id uuid; first_role text;
+begin
+  if cmd='owner' then
+    if not exists(select 1 from public.profiles where id=auth.uid() and (role='مالك' or 'مالك'=any(roles))) then
+      raise exception 'أمر /owner متاح للمالك فقط';
+    end if;
+    select id into target_id from public.profiles where lower(username)=lower(trim(target_username)) limit 1;
+    if target_id is null then raise exception 'العضو غير موجود'; end if;
+    update public.profiles set role='مالك',roles=array['مالك'] where id=target_id;
+    return 'تم تعيين رتبة المالك 👑';
+  elsif cmd='role' then
+    if not public.has_permission('manage_roles') then raise exception 'لا تملك صلاحية إدارة الرتب'; end if;
+    select id into target_id from public.profiles where lower(username)=lower(trim(target_username)) limit 1;
+    if target_id is null then raise exception 'العضو غير موجود'; end if;
+    if coalesce(array_length(role_names,1),0)=0 then raise exception 'اكتب رتبة واحدة على الأقل'; end if;
+    if 'مالك'=any(role_names) and not exists(select 1 from public.profiles where id=auth.uid() and role='مالك') then raise exception 'تعيين المالك للمالك الحالي فقط'; end if;
+    if exists(select 1 from unnest(role_names) n where n not in ('عضو','VIP','مشرف','مدير','مالك') and not exists(select 1 from public.custom_roles c where c.name=n)) then raise exception 'توجد رتبة غير موجودة'; end if;
+    update public.profiles set roles=role_names,role=role_names[1] where id=target_id;
+    return 'تم تحديث رتب العضو';
+  elsif cmd='clear' then
+    if not public.has_permission('delete_messages') then raise exception 'لا تملك صلاحية حذف الرسائل'; end if;
+    if amount is null or amount<1 or amount>150 then raise exception 'اختر عدداً من 1 إلى 150'; end if;
+    delete from public.messages where id in (select id from public.messages order by created_at desc limit amount);
+    return 'تم حذف آخر '||amount||' رسالة';
+  else raise exception 'أمر غير معروف'; end if;
+end;
+$$;
+grant execute on function public.nexora_chat_command(text,text,text[],integer) to authenticated;
