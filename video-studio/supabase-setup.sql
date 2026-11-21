@@ -125,3 +125,14 @@ begin
 end;
 $$;
 grant execute on function public.admin_set_role(uuid,text) to authenticated;
+
+-- تفعيل التحديث الفوري للرسائل في صفحة الدردشة
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname='supabase_realtime' and schemaname='public' and tablename='messages'
+  ) then
+    alter publication supabase_realtime add table public.messages;
+  end if;
+end $$;
