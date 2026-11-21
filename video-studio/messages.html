@@ -17,7 +17,8 @@ if(content.startsWith("/")){
  else if(cmd==="/clear"&&parts[1])result=await sb.rpc("nexora_chat_command",{cmd:"clear",target_username:null,role_names:null,amount:Number(parts[1])});
  else if(cmd==="/ban"&&parts[1])result=await sb.rpc("nexora_chat_command",{cmd:"ban",target_username:parts[1],role_names:null,amount:null});
  else if(cmd==="/timeout"&&parts[1]&&parts[2])result=await sb.rpc("nexora_chat_command",{cmd:"timeout",target_username:parts[1],role_names:null,amount:Number(parts[2])});
- else if(cmd==="/unban"&&parts[1])result=await sb.rpc("nexora_chat_command",{cmd:"unban",target_username:parts[1],role_names:null,amount:null});\n else { $("status").textContent="الأوامر: /owner اسم | /role اسم رتبة1,رتبة2 | /ban اسم | /timeout اسم دقائق | /unban اسم | /clear عدد"; return; }
+ else if(cmd==="/unban"&&parts[1])result=await sb.rpc("nexora_chat_command",{cmd:"unban",target_username:parts[1],role_names:null,amount:null});
+ else { $("status").textContent="الأوامر: /owner اسم | /role اسم رتبة1,رتبة2 | /ban اسم | /timeout اسم دقائق | /unban اسم | /clear عدد"; return; }
  if(result.error)throw result.error;$("status").textContent=result.data||"تم تنفيذ الأمر";$("message").value="";return;
 }
 const r=await sb.from("messages").insert({sender_id:me.id,sender_name:prof.username||me.email.split("@")[0],sender_avatar:prof.avatar_url||null,sender_role:prof.role||null,content}).select().single();
