@@ -22,10 +22,10 @@
 <div class="overlay" id="adminOverlay"><div class="admin"><div class="adminhead"><div><h2>لوحة إدارة NEXORA</h2><p class="muted">إدارة الطلبات وحالاتها</p></div><button class="close" data-close="adminOverlay">إغلاق ✕</button></div><div class="adminstats"><div class="stat"><small>كل الطلبات</small><b id="totalOrders">0</b></div><div class="stat"><small>طلبات جديدة</small><b id="newOrders">0</b></div><div class="stat"><small>مكتملة</small><b id="doneOrders">0</b></div></div><div class="section-head"><h2>الطلبات الواردة</h2><button class="close" id="refreshBtn">تحديث</button></div><div class="orders" id="ordersList"></div><p class="tiny">البيانات محلية على هذا الجهاز والمتصفح فقط. امسح بيانات المتصفح قد يؤدي لفقدانها.</p></div></div>
 <script>
 const products=[
-{id:"vbucks",name:"800 V-Bucks",desc:"عملة Fortnite",price:20,emoji:"⚡",art:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/V-Bucks_icon.png/160px-V-Bucks_icon.png"},
-{id:"robux",name:"100 Robux",desc:"عملة Roblox",price:10,emoji:"◈",art:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Roblox_Robux_2019_Logo_gold.svg/160px-Roblox_Robux_2019_Logo_gold.svg.png"},
+{id:"vbucks",name:"800 V-Bucks",desc:"عملة Fortnite",price:20,emoji:"⚡",art:"https://clipground.com/images/vbucks-clipart-1.jpg"},
+{id:"robux",name:"100 Robux",desc:"عملة Roblox",price:10,emoji:"◈",art:"https://tr.rbxcdn.com/072e18c90eaa0677e52fd068c96337ad/420/420/Image/Png"},
 {id:"gems",name:"100 جوهرة",desc:"جواهر ألعاب",price:5,emoji:"💎",art:""},
-{id:"uc",name:"60 شدة UC",desc:"عملة PUBG Mobile",price:5,emoji:"🪙",art:""}
+{id:"uc",name:"60 شدة UC",desc:"عملة PUBG Mobile",price:5,emoji:"🪙",art:"https://admin.apeakgaming.com/storage/media/Zb4C3mQ2WKpw1BFJ6HjAGFz3QVrfhfG9Ehznp6j1.png"}
 ];
 const $=id=>document.getElementById(id);let chosen=null;
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
