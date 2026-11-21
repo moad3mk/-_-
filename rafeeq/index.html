@@ -98,6 +98,6 @@ checkNewDay();const elapsed=Math.min(8,Math.floor((Date.now()-(s.last||Date.now(
 save();render();
 setTimeout(petLife,3500);
 setInterval(petLife,10500);
-setInterval(()=>{if(document.hidden)return;const finds=["لقيت عملة صغيرة تحت الشجرة! 🪙","لقيت كرة قديمة ونبي نلعب بيها! 🎾","في عصفور وقف جنبي! 🐦","درت لفة ورجعتلك! ❤️","لقيت زهرة حلوة وجبتها ليك! 🌼"];const msg=finds[Math.floor(Math.random()*finds.length)];say(msg);$("lifeStatus").textContent="✨ "+msg;if(Math.random()<.35){addCoins(1);$("coins").textContent=s.coins+1;s.coins+=1;}save();},90000);
+setInterval(()=>{if(document.hidden)return;const finds=["لقيت عملة صغيرة تحت الشجرة! 🪙","لقيت كرة قديمة ونبي نلعب بيها! 🎾","في عصفور وقف جنبي! 🐦","درت لفة ورجعتلك! ❤️","لقيت زهرة حلوة وجبتها ليك! 🌼"];const msg=finds[Math.floor(Math.random()*finds.length)];say(msg);$("lifeStatus").textContent="✨ "+msg;if(Math.random()<.35){addCoins(1);$("coins").textContent=s.coins;}save();},90000);
 })();
 </script></body></html>
