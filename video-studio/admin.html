@@ -22,26 +22,8 @@ $("who").textContent=profile.username+" · المالك";
 render().catch(e=>{$("orders").innerHTML='<div class="empty">تعذر تحميل الطلبات: '+esc(e.message||e)+'</div>';});
 loadSupportTickets().catch(e=>{$("supportTickets").innerHTML='<div class="empty">تعذر تحميل التذاكر: '+esc(e.message||e)+'</div>';});
 }
-async function init(){
-try{
-// افتح اللوحة فوراً من الجلسة المحفوظة محلياً، دون انتظار فحص الرتب أو طلب الشبكة.
-let cached=null;
-try{cached=JSON.parse(localStorage.getItem("sb-xwcukpzibwogtovatxrm-auth-token")||"null");}catch(_){}
-const cachedUser=cached?.user;
-if(cachedUser?.id==="944f2935-7efb-4579-88d3-35a71bf29f79"&&cached?.access_token){
-enterOwner(cachedUser);
-return;
-}
-const auth=await sb.auth.getSession();
-const user=auth.data?.session?.user||null;
-if(!user){showLogin("سجّل الدخول بحساب المالك من المتجر مرة واحدة، ثم ارجع للوحة.");return;}
-if(user.id!=="944f2935-7efb-4579-88d3-35a71bf29f79"){
-showLogin("هذا الحساب غير مصرح له بدخول لوحة الإدارة. الدخول متاح لحساب المالك فقط.");
-await sb.auth.signOut();
-return;
-}
-enterOwner(user);
-}catch(err){showLogin("تعذر فتح جلسة حساب المالك: "+(err.message||"خطأ اتصال"));}}
+function init(){let x=null;try{x=JSON.parse(localStorage.getItem("sb-xwcukpzibwogtovatxrm-auth-token")||"null")}catch(e){}const u=x&&x.user;if(u&&u.id==="944f2935-7efb-4579-88d3-35a71bf29f79"&&x.access_token){enterOwner(u);return}location.replace("./?returnAdmin=1")}
+
 function showLogin(message){$("message").textContent=message||"لا يمكن الدخول بدون حساب وصلاحية إدارة."; $("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");$("refresh").classList.add("hidden");}
 
 $("refresh").onclick=render;
