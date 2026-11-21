@@ -30,8 +30,11 @@ const oldOrders=adminMain.querySelector(".orders");
 const oldUsers=adminMain.querySelector(".users");
 const originalOrders=oldOrders;
 const originalUsers=oldUsers;
-$("ordersTab").onclick=()=>{originalOrders.classList.remove("hidden");originalUsers.classList.remove("hidden");rolesPanel.classList.add("hidden")};
-$("rolesTab").onclick=()=>{originalOrders.classList.add("hidden");originalUsers.classList.add("hidden");rolesPanel.classList.remove("hidden");loadCustomRoles()};
+const ordersHeading=oldOrders.previousElementSibling;
+const usersHeading=oldUsers.previousElementSibling;
+originalUsers.classList.add("hidden");usersHeading.classList.add("hidden");
+$("ordersTab").onclick=()=>{originalOrders.classList.remove("hidden");ordersHeading.classList.remove("hidden");originalUsers.classList.add("hidden");usersHeading.classList.add("hidden");rolesPanel.classList.add("hidden")};
+$("rolesTab").onclick=()=>{originalOrders.classList.add("hidden");ordersHeading.classList.add("hidden");originalUsers.classList.remove("hidden");usersHeading.classList.remove("hidden");rolesPanel.classList.remove("hidden");loadCustomRoles()};
 async function loadCustomRoles(){const q=await sb.from("custom_roles").select("*").order("created_at");if(q.error){$("customRoleMessage").textContent="شغّل تحديث قاعدة البيانات أولاً: "+q.error.message;return}customRoles=q.data||[];$("customRoleList").innerHTML=customRoles.map(r=>'<div class="user"><b style="color:'+esc(r.color)+'">'+esc(r.icon)+' '+esc(r.name)+'</b><span class="muted">'+esc((r.permissions||[]).join("، "))+'</span><button data-remove-role="'+esc(r.name)+'">حذف</button></div>').join("")||'<div class="empty">مافيش رتب مخصصة لحد الآن.</div>';document.querySelectorAll("[data-remove-role]").forEach(b=>b.onclick=async()=>{if(!confirm("متأكد تبي تحذف الرتبة؟"))return;const d=await sb.from("custom_roles").delete().eq("name",b.dataset.removeRole);if(d.error)alert(d.error.message);else loadCustomRoles()})}
 $("customRoleForm").onsubmit=async e=>{e.preventDefault();const role={name:$("customRoleName").value.trim(),color:$("customRoleColor").value,icon:$("customRoleIcon").value.trim(),permissions:$("customRolePermissions").value.split(",").map(x=>x.trim()).filter(Boolean)};const q=await sb.from("custom_roles").upsert(role,{onConflict:"name"});$("customRoleMessage").textContent=q.error?"تعذر الحفظ: "+q.error.message:"تم حفظ الرتبة بنجاح.";if(!q.error){e.target.reset();loadCustomRoles()}};
 
