@@ -74,3 +74,38 @@ for all to authenticated using (public.is_admin()) with check (public.is_admin()
 -- بعد إنشاء حسابك من الموقع، نفّذ هذا السطر مرة واحدة مع استبدال البريد:
 -- update public.profiles p set role = 'مدير'
 -- from auth.users u where p.id = u.id and u.email = 'YOUR_EMAIL_HERE';
+
+-- إضافات الملف الشخصي والدردشة العامة (شغّل هذا الجزء بعد الإعداد الأساسي)
+alter table public.profiles add column if not exists avatar_url text;
+drop policy if exists "Update own profile" on public.profiles;
+create policy "Update own profile" on public.profiles
+for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+
+create table if not exists public.messages (
+ id uuid primary key default gen_random_uuid(),
+ sender_id uuid not null references auth.users(id) on delete cascade,
+ sender_name text not null,
+ sender_avatar text,
+ content text not null check (char_length(content) between 1 and 1500),
+ created_at timestamptz not null default now()
+);
+alter table public.messages enable row level security;
+drop policy if exists "Authenticated users read messages" on public.messages;
+create policy "Authenticated users read messages" on public.messages
+for select to authenticated using (true);
+drop policy if exists "Users send own messages" on public.messages;
+create policy "Users send own messages" on public.messages
+for insert to authenticated with check (auth.uid() = sender_id);
+
+insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
+values ('avatars','avatars',true,3145728,array['image/jpeg','image/png','image/webp','image/gif'])
+on conflict (id) do update set public=true,file_size_limit=3145728,allowed_mime_types=array['image/jpeg','image/png','image/webp','image/gif'];
+drop policy if exists "Avatar images are public" on storage.objects;
+create policy "Avatar images are public" on storage.objects for select using (bucket_id='avatars');
+drop policy if exists "Users upload own avatar" on storage.objects;
+create policy "Users upload own avatar" on storage.objects for insert to authenticated
+with check (bucket_id='avatars' and (storage.foldername(name))[1]=auth.uid()::text);
+drop policy if exists "Users update own avatar" on storage.objects;
+create policy "Users update own avatar" on storage.objects for update to authenticated
+using (bucket_id='avatars' and (storage.foldername(name))[1]=auth.uid()::text)
+with check (bucket_id='avatars' and (storage.foldername(name))[1]=auth.uid()::text);
