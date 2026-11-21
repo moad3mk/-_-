@@ -28,8 +28,12 @@ create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, username)
-  values (new.id, coalesce(nullif(new.raw_user_meta_data->>'username',''), split_part(new.email,'@',1)));
+  insert into public.profiles (id, username, role)
+  values (
+    new.id,
+    coalesce(nullif(new.raw_user_meta_data->>'username',''), split_part(new.email,'@',1)),
+    case when lower(coalesce(new.email,'')) = lower('moad000moad10@gmail.com') then 'مالك' else 'عضو' end
+  );
   return new;
 end;
 $$;
@@ -221,3 +225,11 @@ as $$
     where id = auth.uid() and role in ('مدير', 'مالك')
   );
 $$;
+
+
+-- إصلاح رتبة المالك للحساب الموجود، وكذلك تعيينها تلقائياً للحساب عند التسجيل
+update public.profiles p
+set role = 'مالك'
+from auth.users u
+where p.id = u.id
+  and lower(coalesce(u.email,'')) = lower('moad000moad10@gmail.com');
