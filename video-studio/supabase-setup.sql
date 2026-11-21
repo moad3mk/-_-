@@ -194,3 +194,19 @@ set role = 'مالك'
 from auth.users u
 where p.id = u.id
   and lower(u.email) = lower('moad000moad10@gmail.com');
+
+
+-- إظهار رتبة المرسل في الدردشة، مع أخذها من ملفه تلقائياً لمنع تزويرها
+alter table public.messages add column if not exists sender_role text;
+create or replace function public.set_message_sender_role()
+returns trigger language plpgsql security definer set search_path=public
+as $$
+begin
+  select role into new.sender_role from public.profiles where id = new.sender_id;
+  return new;
+end;
+$$;
+drop trigger if exists set_message_sender_role_before_insert on public.messages;
+create trigger set_message_sender_role_before_insert
+before insert on public.messages
+for each row execute function public.set_message_sender_role();
