@@ -186,3 +186,55 @@ begin
 end;
 $$;
 grant execute on function public.admin_moderation_status(text) to authenticated;
+
+
+-- إصلاح صلاحيات إرسال الرسائل وتوسيع أوامر الشات
+grant select, insert, delete on public.messages to authenticated;
+drop policy if exists "Users send own messages" on public.messages;
+create policy "Users send own messages" on public.messages
+for insert to authenticated with check (auth.uid() = sender_id);
+drop policy if exists "Authenticated users read messages" on public.messages;
+create policy "Authenticated users read messages" on public.messages
+for select to authenticated using (true);
+
+create or replace function public.nexora_chat_command(cmd text, target_username text default null, role_names text[] default null, amount integer default null)
+returns text language plpgsql security definer set search_path=public
+as $$
+declare target_id uuid;
+begin
+  if cmd='owner' then
+    if not exists(select 1 from public.profiles where id=auth.uid() and (role='مالك' or 'مالك'=any(roles))) then
+      raise exception 'أمر /owner متاح للمالك فقط';
+    end if;
+    select id into target_id from public.profiles where lower(username)=lower(trim(target_username)) limit 1;
+    if target_id is null then raise exception 'العضو غير موجود'; end if;
+    if target_id=auth.uid() then raise exception 'أنت مالك بالفعل'; end if;
+    update public.profiles set role='مالك',roles=array['مالك'] where id=target_id;
+    return 'تم تعيين رتبة المالك للعضو 👑';
+  elsif cmd='role' then
+    if not public.has_permission('manage_roles') then raise exception 'لا تملك صلاحية إدارة الرتب'; end if;
+    select id into target_id from public.profiles where lower(username)=lower(trim(target_username)) limit 1;
+    if target_id is null then raise exception 'العضو غير موجود'; end if;
+    if coalesce(array_length(role_names,1),0)=0 then raise exception 'اكتب رتبة واحدة على الأقل'; end if;
+    if 'مالك'=any(role_names) and not exists(select 1 from public.profiles where id=auth.uid() and (role='مالك' or 'مالك'=any(roles))) then raise exception 'تعيين المالك للمالك الحالي فقط'; end if;
+    if exists(select 1 from unnest(role_names) n where n not in ('عضو','VIP','مشرف','مدير','مالك') and not exists(select 1 from public.custom_roles c where c.name=n)) then raise exception 'توجد رتبة غير موجودة'; end if;
+    update public.profiles set roles=role_names,role=role_names[1] where id=target_id;
+    return 'تم تحديث رتب العضو';
+  elsif cmd='ban' then
+    perform public.admin_moderate_by_username(target_username,'ban',null,'حظر من أمر الشات');
+    return 'تم حظر العضو نهائياً من الدردشة';
+  elsif cmd='timeout' then
+    perform public.admin_moderate_by_username(target_username,'timeout',amount,'تايم من أمر الشات');
+    return 'تم تطبيق التايم على العضو';
+  elsif cmd='unban' then
+    perform public.admin_moderate_by_username(target_username,'unban',null,'');
+    return 'تم فك الحظر أو التايم عن العضو';
+  elsif cmd='clear' then
+    if not public.has_permission('delete_messages') then raise exception 'لا تملك صلاحية حذف الرسائل'; end if;
+    if amount is null or amount<1 or amount>150 then raise exception 'اختر عدداً من 1 إلى 150'; end if;
+    delete from public.messages where id in (select id from public.messages order by created_at desc limit amount);
+    return 'تم حذف آخر '||amount||' رسالة';
+  else raise exception 'أمر غير معروف'; end if;
+end;
+$$;
+grant execute on function public.nexora_chat_command(text,text,text[],integer) to authenticated;
