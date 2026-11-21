@@ -14,15 +14,15 @@ const sb=window.supabase.createClient("https://xwcukpzibwogtovatxrm.supabase.co"
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 async function init(){try{
 $("message").textContent="جاري التحقق من جلسة المتجر...";
-const auth=await Promise.race([sb.auth.getSession(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("تعذر قراءة الجلسة خلال 3 ثوانٍ")),8000))]);
+const auth=await Promise.race([sb.auth.getSession(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("تعذر قراءة الجلسة خلال 3 ثوانٍ")),3000))]);
 const user=auth.data?.session?.user||null;me=user;
 if(!user){showLogin("مافيش حساب مسجّل في نفس المتصفح. افتح المتجر وسجّل دخولك ثم ارجع للوحة.");return;}
 $("message").textContent="تم العثور على حسابك، جاري فحص الرتبة...";
-const pr=await Promise.race([sb.from("profiles").select("username,role,roles").eq("id",user.id).maybeSingle(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("قراءة ملف العضو تجاوزت 3 ثوانٍ")),8000))]);
+const pr=await Promise.race([sb.from("profiles").select("username,role,roles").eq("id",user.id).maybeSingle(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("قراءة ملف العضو تجاوزت 3 ثوانٍ")),3000))]);
 const profile=pr.data;if(pr.error||!profile){showLogin("تعذر قراءة رتبتك: "+(pr.error?.message||"ملف العضو غير موجود"));return;}
 const assigned=[...new Set([...(profile.roles||[]),profile.role].filter(Boolean))];
 isOwner=user.id==="944f2935-7efb-4579-88d3-35a71bf29f79"||profile.role==="مالك"||assigned.includes("مالك");
-const rr=await Promise.race([sb.from("custom_roles").select("name,permissions,sort_order").in("name",assigned),new Promise((_,reject)=>setTimeout(()=>reject(new Error("قراءة صلاحيات الرتب تجاوزت 3 ثوانٍ")),8000))]);
+const rr=await Promise.race([sb.from("custom_roles").select("name,permissions,sort_order").in("name",assigned),new Promise((_,reject)=>setTimeout(()=>reject(new Error("قراءة صلاحيات الرتب تجاوزت 3 ثوانٍ")),3000))]);
 if(rr.error){showLogin("تعذر قراءة صلاحياتك: "+rr.error.message);return;}
 const ranked=(rr.data||[]).sort((a,b)=>Number(a.sort_order??9999)-Number(b.sort_order??9999));
 const mainRole=ranked[0]?.name||profile.role||"عضو";
