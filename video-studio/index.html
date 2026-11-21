@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d18"><title>مشهد AI — استوديو الفيديو</title>
+<style>
+:root{--bg:#090d18;--panel:#111a2b;--line:#24324b;--muted:#9eacc4;--txt:#f4f7ff;--a:#8b7cff;--b:#36d6bd}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0,#24204b 0,transparent 38%),var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+.wrap{max-width:980px;margin:auto;padding:22px 16px 56px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px}.mark{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--a),var(--b));display:grid;place-items:center;color:#07111c;font-size:22px}
+.pill{border:1px solid #27584f;color:#7ff3d9;background:#102a2a;padding:7px 11px;border-radius:99px;font-size:12px}
+.hero{text-align:center;padding:42px 0 26px}.hero h1{font-size:clamp(30px,7vw,54px);line-height:1.12;margin:0 0 12px;letter-spacing:-1px}.grad{background:linear-gradient(90deg,#a89aff,#55e4cf);color:transparent;background-clip:text}.hero p{color:var(--muted);line-height:1.9;max-width:620px;margin:auto}
+.panel{background:linear-gradient(150deg,#151f34,#101827);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 20px 60px #0005}.label{font-size:14px;font-weight:800;margin:0 0 10px;display:block}
+textarea{width:100%;min-height:140px;resize:vertical;background:#090f1c;border:1px solid #34435e;border-radius:14px;color:white;padding:15px;font:inherit;line-height:1.8;outline:none}textarea:focus{border-color:var(--a);box-shadow:0 0 0 3px #8b7cff22}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.chip{border:1px solid #34435e;background:#141f32;color:#dce5f7;padding:9px 13px;border-radius:99px;font:inherit;cursor:pointer}.chip:hover,.chip.active{border-color:var(--a);background:#29264b}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:17px}.btn{border:0;border-radius:13px;padding:14px 12px;font:700 15px system-ui;cursor:pointer}.primary{background:linear-gradient(100deg,#9a83ff,#48dfc4);color:#09121e}.secondary{background:#202d43;color:#f4f7ff;border:1px solid #34435e}
+.note{color:var(--muted);font-size:12px;line-height:1.8;margin:13px 0 0}.section{margin-top:27px}.section h2{font-size:19px;margin:0 0 13px}.providers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.provider{background:#111a2b;border:1px solid var(--line);border-radius:17px;padding:16px;display:flex;flex-direction:column;gap:9px}.provider h3{margin:0;font-size:16px}.provider p{margin:0;color:var(--muted);font-size:13px;line-height:1.7;flex:1}.provider a{display:block;text-decoration:none;text-align:center;padding:11px;border-radius:11px;background:#263452;color:white;font-weight:700}.tag{font-size:11px;color:#75ead3}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.step{border:1px solid var(--line);border-radius:14px;padding:14px;background:#101827}.step b{display:block;margin-bottom:5px}.step span{color:var(--muted);font-size:12px;line-height:1.7}
+footer{text-align:center;color:#71809a;font-size:12px;margin-top:32px}
+@media(max-width:600px){.wrap{padding:16px 13px 40px}.hero{padding:34px 0 22px}.panel{padding:15px}.providers{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.top .pill{font-size:10px}}
+</style></head>
+<body><main class="wrap">
+<header class="top"><div class="logo"><span class="mark">▶</span><span>مَشهد <span class="grad">AI</span></span></div><span class="pill">استوديو مجاني لصناعة الفيديو</span></header>
+<section class="hero"><h1>فكرتك… تصير <span class="grad">فيديو</span></h1><p>اكتب المشهد اللي في بالك، جهّز وصف احترافي، وانطلق لمولد فيديو مجاني. بدون مفاتيح API أو إعدادات تقنية.</p></section>
+<section class="panel">
+<label class="label" for="prompt">✍️ وصف الفيديو</label>
+<textarea id="prompt" maxlength="1800" placeholder="مثال: أسد يمشي ببطء وسط غابة ضبابية وقت الشروق، تصوير سينمائي واقعي والكاميرا تتحرك بجانبه..."></textarea>
+<div class="row" aria-label="أنماط مقترحة">
+<button class="chip" data-style="cinema">🎬 سينمائي</button><button class="chip" data-style="real">📷 واقعي</button><button class="chip" data-style="anime">🌸 أنمي</button><button class="chip" data-style="fantasy">✨ خيالي</button><button class="chip" data-style="ad">🛍️ إعلان</button>
+</div>
+<div class="actions"><button class="btn primary" id="go">جهّز الوصف وافتح مولّد الفيديو ↗</button><button class="btn secondary" id="copy">نسخ الوصف</button></div>
+<p class="note" id="status" aria-live="polite">ملاحظة: التوليد الفعلي يتم عند مزوّد الخدمة الخارجي؛ هذا الموقع لا يدّعي امتلاك خوادم توليد خاصة.</p>
+</section>
+<section class="section"><h2>اختر محرك التوليد المجاني</h2><div class="providers">
+<article class="provider"><span class="tag">خيار للبدء بدون حساب</span><h3>Raphael AI</h3><p>يعلن عن توليد نص أو صورة إلى فيديو مجاناً باستخدام Hailuo/MiniMax، بجودة 480p ومقطع قصير. التوفر والحدود قد تتغير.</p><a href="https://raphael.app/ai-video-generator" target="_blank" rel="noopener">افتح مولّد Raphael ↗</a></article>
+<article class="provider"><span class="tag">بديل بسيط</span><h3>FreeGenVideo</h3><p>توليد من نص أو صورة بدون تسجيل، ويذكر الموقع وجود محاولة مجانية يومياً. قد تختلف الخيارات حسب المحرك المتاح.</p><a href="https://freegen.video/" target="_blank" rel="noopener">افتح FreeGenVideo ↗</a></article>
+</div></section>
+<section class="section"><h2>كيف تستخدمه؟</h2><div class="steps"><div class="step"><b>١ — اكتب</b><span>اوصف المكان والشخصية والحركة وزاوية الكاميرا.</span></div><div class="step"><b>٢ — جهّز</b><span>اختار نمطاً وانسخ الوصف المحسّن.</span></div><div class="step"><b>٣ — ولّد</b><span>افتح المحرك المجاني والصق الوصف واضغط Generate.</span></div></div></section>
+<footer>مَشهد AI · مشروع مستقل وتجريبي · خدمات التوليد الخارجية لها شروط وحدود خاصة بها</footer>
+</main>
+<script>
+const promptEl=document.getElementById('prompt'),statusEl=document.getElementById('status');
+const suffix={cinema:'cinematic lighting, smooth camera movement, film-quality composition, detailed scene',real:'photorealistic, natural lighting, realistic motion, high detail',anime:'beautiful anime style, expressive motion, vibrant colors, detailed background',fantasy:'magical atmosphere, imaginative world, dramatic lighting, epic visual effects',ad:'premium commercial style, clean composition, product-focused camera movement, polished lighting'};
+let chosen='';
+document.querySelectorAll('[data-style]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-style]').forEach(x=>x.classList.remove('active'));b.classList.add('active');chosen=b.dataset.style;statusEl.textContent='تم اختيار النمط. اضغط تجهيز الوصف عند الانتهاء.';}));
+function finalPrompt(){let p=promptEl.value.trim();if(!p)return '';return p+(chosen?', '+suffix[chosen]:'')+'. High quality, coherent motion, no flicker.'}
+async function copyPrompt(){const p=finalPrompt();if(!p){statusEl.textContent='اكتب وصف الفيديو أولاً.';return false}try{await navigator.clipboard.writeText(p);statusEl.textContent='تم نسخ الوصف المحسّن. الصقه في مولّد الفيديو.';return true}catch(e){promptEl.value=p;promptEl.select();statusEl.textContent='حددنا الوصف؛ انسخه يدوياً ثم افتح المحرك.';return false}}
+document.getElementById('copy').addEventListener('click',copyPrompt);
+document.getElementById('go').addEventListener('click',async()=>{if(!promptEl.value.trim()){statusEl.textContent='اكتب وصف الفيديو أولاً.';promptEl.focus();return}const w=window.open('https://raphael.app/ai-video-generator','_blank','noopener');await copyPrompt();if(!w)statusEl.textContent+=' إذا لم تفتح الصفحة، اضغط رابط Raphael بالأسفل.';else statusEl.textContent+=' فتحنا المحرك في تبويب جديد؛ الصق الوصف واضغط Generate.';});
+</script></body></html>
