@@ -1,51 +1,14 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101827"><title>مركز الطالب | مساحتك للدراسة</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مساحة فارغة</title>
 <style>
-:root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#293b55;--text:#f3f7ff;--muted:#9aabc2;--accent:#8b9cff;--mint:#59dfc1;--danger:#ff8585}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0,#1d3150 0,transparent 38%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
-.wrap{max-width:1050px;margin:auto;padding:20px 15px 55px}.head{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:11px;font-weight:900;font-size:19px}.logo{width:43px;height:43px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--mint));display:grid;place-items:center;color:#101827;font-size:22px}.date{color:var(--muted);font-size:12px}
-.hero{padding:30px 0 20px}.hero h1{font-size:clamp(27px,6vw,43px);margin:0 0 7px}.hero p{color:var(--muted);margin:0}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.stat,.panel{background:linear-gradient(145deg,var(--panel),#101a2a);border:1px solid var(--line);border-radius:18px}.stat{padding:15px}.stat b{display:block;font-size:25px}.stat span{color:var(--muted);font-size:12px}
-.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 13px}.tab{white-space:nowrap;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:10px 15px;border-radius:12px;font:inherit;cursor:pointer}.tab.active{background:#27365a;border-color:#6579ca;color:white}
-.panel{padding:17px;margin-bottom:13px}.panel h2{font-size:18px;margin:0 0 13px}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:13px}.row{display:flex;gap:8px}.field{width:100%;background:#0b1524;border:1px solid var(--line);border-radius:11px;padding:12px;color:var(--text);font:inherit;min-width:0}.field:focus{outline:2px solid #6579ca;border-color:transparent}textarea.field{resize:vertical;min-height:140px}
-.btn{border:0;border-radius:11px;padding:11px 15px;background:var(--accent);color:#101827;font:inherit;font-weight:800;cursor:pointer}.btn.secondary{background:#24354d;color:var(--text);border:1px solid var(--line)}.btn.danger{background:#492a37;color:#ffc0c0}.btn:active{transform:scale(.98)}
-.task{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.task input{width:18px;height:18px;accent-color:var(--mint)}.task.done .taskname{text-decoration:line-through;color:var(--muted)}.taskname{flex:1;overflow-wrap:anywhere}.small{font-size:12px;color:var(--muted)}
-.timer{text-align:center;padding:18px 0}.clock{font-size:clamp(52px,13vw,76px);font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums}.timer p{color:var(--muted)}.timerBtns{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.note{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:#0e1929}.note strong{display:block}.note p{margin:5px 0 0;color:var(--muted);font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
-.hidden{display:none!important}.empty{color:var(--muted);text-align:center;padding:22px 8px}.foot{text-align:center;color:var(--muted);font-size:11px;padding-top:16px}
-@media(max-width:700px){.grid{grid-template-columns:1fr}.stats{gap:7px}.stat{padding:12px}.stat b{font-size:21px}.head{align-items:flex-start}}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b1020;color:#e8edf7;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(92%,520px);padding:32px 24px;text-align:center;border:1px solid #263149;border-radius:22px;background:#111a2d}
+h1{font-size:25px;margin:0 0 12px}p{color:#aab6cc;line-height:1.8;margin:0}
 </style>
 </head>
-<body><main class="wrap">
-<header class="head"><div class="brand"><div class="logo">✦</div><div>مركز الطالب<div class="small">مساحتك الصغيرة للإنجاز</div></div></div><div class="date" id="today"></div></header>
-<section class="hero"><h1>خلّي يومك الدراسي <span style="color:var(--mint)">أوضح وأسهل.</span></h1><p>رتّب مهامك، ركّز في قرايتك، وخلي ملاحظاتك كلها في مكان واحد.</p></section>
-<section class="stats"><div class="stat"><b id="total">0</b><span>كل المهام</span></div><div class="stat"><b id="done">0</b><span>مهام مكتملة</span></div><div class="stat"><b id="left">0</b><span>باقي عليك</span></div></section>
-<nav class="tabs"><button class="tab active" data-tab="tasks">📋 المهام</button><button class="tab" data-tab="focus">⏱️ التركيز</button><button class="tab" data-tab="notes">📝 الملاحظات</button><button class="tab" data-tab="plan">📚 خطة اليوم</button></nav>
-<section id="tasks" class="page"><div class="grid"><div class="panel"><h2>شن عندك اليوم؟</h2><form id="taskForm" class="row"><input id="taskInput" class="field" placeholder="مثلاً: نراجع درس الرياضيات" maxlength="100" required><button class="btn">إضافة</button></form><div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px"><b>قائمة مهامك</b><button class="btn secondary" id="clearDone" type="button">مسح المكتمل</button></div><div id="taskList"></div></div><div class="panel"><h2>ابدأ بحاجة وحدة</h2><p class="small">مش لازم تكمل كل شيء مرة وحدة. اختار مهمة صغيرة وابدأ فيها توا.</p><div id="nextTask" class="empty">أضف أول مهمة ليومك ✨</div><button class="btn secondary" style="width:100%" id="goFocus">ابدأ جلسة تركيز</button></div></div></section>
-<section id="focus" class="page hidden"><div class="panel timer"><h2>وقت التركيز</h2><div class="clock" id="clock">25:00</div><p id="timerLabel">جلسة تركيز — 25 دقيقة</p><div class="timerBtns"><button class="btn" id="startTimer">ابدأ</button><button class="btn secondary" id="pauseTimer">إيقاف مؤقت</button><button class="btn secondary" id="resetTimer">إعادة</button></div><div style="margin-top:18px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap"><button class="tab active" data-min="25">25 دقيقة</button><button class="tab" data-min="15">15 دقيقة</button><button class="tab" data-min="5">5 دقائق</button></div><p class="small">نصيحة: ابعد المشتتات وخلي تركيزك على حاجة واحدة.</p></div></section>
-<section id="notes" class="page hidden"><div class="panel"><h2>دفتر ملاحظاتك</h2><input id="noteTitle" class="field" placeholder="عنوان الملاحظة" maxlength="70"><textarea id="noteBody" class="field" style="margin-top:8px" placeholder="اكتب معلومة، فكرة، أو ملخص درس..."></textarea><button class="btn" id="saveNote" style="margin-top:8px">احفظ الملاحظة</button><h2 style="margin-top:22px">ملاحظات محفوظة</h2><div id="noteList"></div></div></section>
-<section id="plan" class="page hidden"><div class="panel"><h2>خطة مذاكرة اليوم</h2><p class="small">اكتب المواد أو الدروس اللي تبي تراجعها، واحفظ خطتك على جهازك.</p><textarea id="planText" class="field" placeholder="مثلاً:\n4:00 — إنجليزي: مراجعة الكلمات\n5:00 — رياضيات: حل تمارين"></textarea><button class="btn" id="savePlan" style="margin-top:9px">حفظ الخطة</button><span id="planSaved" class="small" style="margin-right:10px"></span></div></section>
-<footer class="foot">بياناتك محفوظة على نفس الجهاز في هذا المتصفح — ما فيش حساب ولا اشتراك.</footer>
-</main>
-<script>
-const $=s=>document.querySelector(s), load=(k,d)=>{try{return JSON.parse(localStorage.getItem('student_'+k))??d}catch{return d}}, save=(k,v)=>localStorage.setItem('student_'+k,JSON.stringify(v));
-let tasks=load('tasks',[]),notes=load('notes',[]),seconds=1500,remaining=1500,interval=null;
-$('#today').textContent=new Intl.DateTimeFormat('ar',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
-function renderTasks(){const list=$('#taskList');list.innerHTML='';if(!tasks.length)list.innerHTML='<div class="empty">ما عندكش مهام توا. أضف أول مهمة 👆</div>';tasks.forEach((t,i)=>{const el=document.createElement('div');el.className='task'+(t.done?' done':'');el.innerHTML='<input type="checkbox" '+(t.done?'checked':'')+' aria-label="إكمال المهمة"><span class="taskname"></span><button class="btn danger" style="padding:6px 9px" aria-label="حذف">×</button>';el.querySelector('.taskname').textContent=t.text;el.querySelector('input').onchange=e=>{tasks[i].done=e.target.checked;save('tasks',tasks);renderTasks()};el.querySelector('button').onclick=()=>{tasks.splice(i,1);save('tasks',tasks);renderTasks()};list.append(el)});const n=tasks.length,d=tasks.filter(x=>x.done).length;$('#total').textContent=n;$('#done').textContent=d;$('#left').textContent=n-d;const next=tasks.find(x=>!x.done);$('#nextTask').textContent=next?next.text:'كل مهامك مكتملة! ممتاز 🎉'}
-$('#taskForm').onsubmit=e=>{e.preventDefault();const v=$('#taskInput').value.trim();if(!v)return;tasks.unshift({text:v,done:false});save('tasks',tasks);$('#taskInput').value='';renderTasks()};
-$('#clearDone').onclick=()=>{tasks=tasks.filter(t=>!t.done);save('tasks',tasks);renderTasks()};
-function showTab(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id))}
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));$('#goFocus').onclick=()=>showTab('focus');
-function displayTime(){let m=Math.floor(remaining/60),s=remaining%60;$('#clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
-function stopTimer(){if(interval)clearInterval(interval);interval=null}
-$('#startTimer').onclick=()=>{if(interval)return;interval=setInterval(()=>{remaining--;displayTime();if(remaining<=0){stopTimer();$('#timerLabel').textContent='أحسنت! خذ استراحة قصيرة 🌿';if('Notification'in window&&Notification.permission==='granted')new Notification('انتهت جلسة التركيز!')}} ,1000)};
-$('#pauseTimer').onclick=stopTimer;$('#resetTimer').onclick=()=>{stopTimer();remaining=seconds;displayTime();$('#timerLabel').textContent='جلسة تركيز — '+seconds/60+' دقيقة'};
-document.querySelectorAll('[data-min]').forEach(b=>b.onclick=()=>{stopTimer();seconds=Number(b.dataset.min)*60;remaining=seconds;displayTime();$('#timerLabel').textContent='جلسة تركيز — '+b.dataset.min+' دقيقة';document.querySelectorAll('[data-min]').forEach(x=>x.classList.toggle('active',x===b))});
-function renderNotes(){let box=$('#noteList');box.innerHTML='';if(!notes.length){box.innerHTML='<div class="empty">ملاحظاتك اللي تحفظها بتظهر هنا.</div>';return}notes.forEach((n,i)=>{let el=document.createElement('div');el.className='note';let content=document.createElement('div'),title=document.createElement('strong'),body=document.createElement('p'),del=document.createElement('button');title.textContent=n.title;body.textContent=n.body;del.className='btn danger';del.textContent='حذف';del.onclick=()=>{notes.splice(i,1);save('notes',notes);renderNotes()};content.append(title,body);el.append(content,del);box.append(el)})}
-$('#saveNote').onclick=()=>{let title=$('#noteTitle').value.trim(),body=$('#noteBody').value.trim();if(!title&&!body)return;notes.unshift({title:title||'ملاحظة بدون عنوان',body});save('notes',notes);$('#noteTitle').value='';$('#noteBody').value='';renderNotes()};
-$('#planText').value=load('plan','');$('#savePlan').onclick=()=>{save('plan',$('#planText').value);$('#planSaved').textContent='تم الحفظ ✓';setTimeout(()=>$('#planSaved').textContent='',2200)};
-renderTasks();renderNotes();displayTime();
-</script></body></html>
+<body><main><h1>المساحة متروكة حالياً</h1><p>تم إلغاء الفكرة السابقة. المستودع محفوظ، ومافيش مشروع مفروض عليك.</p></main></body>
+</html>
