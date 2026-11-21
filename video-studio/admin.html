@@ -13,29 +13,25 @@
 const sb=window.supabase.createClient("https://xwcukpzibwogtovatxrm.supabase.co","sb_publishable_o2m2T1bxzdxYlgjpgDZQag_K0GoqAsZ",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"sb-xwcukpzibwogtovatxrm-auth-token",storage:window.localStorage}});const $=id=>document.getElementById(id);let me=null,customRoles=[],isOwner=false;
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 async function init(){try{
-$("message").textContent="جاري قراءة جلسة حسابك...";
-const raw=localStorage.getItem("sb-xwcukpzibwogtovatxrm-auth-token");
-let saved=null;try{saved=raw?JSON.parse(raw):null}catch(e){}
-const accessToken=saved?.access_token||saved?.currentSession?.access_token||null;
-if(!accessToken){showLogin("مافيش حساب مسجّل في نفس المتصفح. افتح المتجر وسجّل دخولك بنفس المتصفح، وبعدها افتح اللوحة.");return;}
-$("message").textContent="تم العثور على الجلسة، جاري التحقق من الحساب...";
-const authResult=await Promise.race([sb.auth.getUser(accessToken),new Promise((_,reject)=>setTimeout(()=>reject(new Error("انتهت مهلة التحقق من الاتصال")),12000))]);
-if(authResult.error||!authResult.data?.user){showLogin("جلسة الحساب غير صالحة أو انتهت. افتح المتجر وسجّل دخولك من جديد.");return;}
-const user=authResult.data.user;me=user;
-$("message").textContent="تم التحقق من الحساب، جاري فحص الرتبة والصلاحيات...";
-const profileResult=await Promise.race([sb.from("profiles").select("username,role,roles").eq("id",user.id).maybeSingle(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("انتهت مهلة قراءة ملف العضو")),12000))]);
-const profile=profileResult.data;
-if(profileResult.error||!profile){showLogin("تعذر قراءة رتبتك من profiles: "+(profileResult.error?.message||"ملف العضو غير موجود"));return;}
+$("message").textContent="جاري التحقق من جلسة المتجر...";
+const auth=await Promise.race([sb.auth.getSession(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("تعذر قراءة الجلسة خلال 8 ثوانٍ")),8000))]);
+const user=auth.data?.session?.user||null;me=user;
+if(!user){showLogin("مافيش حساب مسجّل في نفس المتصفح. افتح المتجر وسجّل دخولك ثم ارجع للوحة.");return;}
+$("message").textContent="تم العثور على حسابك، جاري فحص الرتبة...";
+const pr=await Promise.race([sb.from("profiles").select("username,role,roles").eq("id",user.id).maybeSingle(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("قراءة ملف العضو تجاوزت 8 ثوانٍ")),8000))]);
+const profile=pr.data;if(pr.error||!profile){showLogin("تعذر قراءة رتبتك: "+(pr.error?.message||"ملف العضو غير موجود"));return;}
 const assigned=[...new Set([...(profile.roles||[]),profile.role].filter(Boolean))];
 isOwner=user.id==="944f2935-7efb-4579-88d3-35a71bf29f79"||profile.role==="مالك"||assigned.includes("مالك");
-const rr=await Promise.race([sb.from("custom_roles").select("name,permissions,sort_order").in("name",assigned),new Promise((_,reject)=>setTimeout(()=>reject(new Error("انتهت مهلة قراءة صلاحيات الرتب")),12000))]);
-const rankedRoles=(rr.data||[]).sort((a,b)=>Number(a.sort_order??9999)-Number(b.sort_order??9999));
-const mainRole=rankedRoles[0]?.name||profile.role||"عضو";
+const rr=await Promise.race([sb.from("custom_roles").select("name,permissions,sort_order").in("name",assigned),new Promise((_,reject)=>setTimeout(()=>reject(new Error("قراءة صلاحيات الرتب تجاوزت 8 ثوانٍ")),8000))]);
+if(rr.error){showLogin("تعذر قراءة صلاحياتك: "+rr.error.message);return;}
+const ranked=(rr.data||[]).sort((a,b)=>Number(a.sort_order??9999)-Number(b.sort_order??9999));
+const mainRole=ranked[0]?.name||profile.role||"عضو";
 const perms=(rr.data||[]).flatMap(x=>x.permissions||[]);
-if(!isOwner&&!perms.includes("all")&&!perms.includes("admin_access")){showLogin("حسابك رتبتُه "+mainRole+" وما عندهاش صلاحية دخول لوحة الإدارة.");return;}
-$("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");$("refresh").classList.remove("hidden");
-$("who").textContent=(profile.username||user.email)+" · "+mainRole;
-await render();await loadSupportTickets();
+if(!isOwner&&!perms.includes("all")&&!perms.includes("admin_access")){showLogin("رتبتك "+mainRole+" ما عندهاش صلاحية دخول لوحة الإدارة.");return;}
+$("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");$("refresh").classList.remove("hidden");$("who").textContent=(profile.username||user.email)+" · "+mainRole;
+$("message").textContent="تم التحقق. جاري تحميل بيانات اللوحة...";
+await Promise.allSettled([Promise.race([render(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("تحميل الطلبات تأخر")),12000))]),Promise.race([loadSupportTickets(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("تحميل التذاكر تأخر")),12000))])]);
+$("message").textContent="";
 }catch(err){showLogin("تعذر إكمال التحقق: "+(err.message||"خطأ اتصال"));}}
 function showLogin(message){$("message").textContent=message||"لا يمكن الدخول بدون حساب وصلاحية إدارة."; $("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");$("refresh").classList.add("hidden");}
 
