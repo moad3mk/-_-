@@ -29,13 +29,14 @@ const products=[
 ];
 const $=id=>document.getElementById(id);let chosen=null;
 function currencyArt(id){
-const common='width="88" height="88" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"';
-if(id==="vbucks")return '<svg '+common+'><defs><linearGradient id="vb" x2="1" y2="1"><stop stop-color="#9deaff"/><stop offset="1" stop-color="#2863d9"/></linearGradient></defs><circle cx="50" cy="50" r="43" fill="#142d60" stroke="#72d9ff" stroke-width="3"/><path d="M19 23h17l15 37 15-37h17L58 78H43z" fill="url(#vb)" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M30 17h40" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/></svg>';
-if(id==="robux")return '<svg '+common+'><defs><linearGradient id="rb" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#aebbd0"/></linearGradient></defs><circle cx="50" cy="50" r="43" fill="#26364c" stroke="#e5edf8" stroke-width="2"/><path d="M28 20h44v60H28z" fill="#e9eef7" transform="rotate(22 50 50)"/><path d="M39 34h22v32H39z" fill="#26364c" transform="rotate(22 50 50)"/><path d="M46 41h12v18H46z" fill="url(#rb)" transform="rotate(22 50 50)"/></svg>';
-if(id==="uc")return '<svg '+common+'><defs><linearGradient id="ucg" x2="1" y2="1"><stop stop-color="#fff0a3"/><stop offset=".48" stop-color="#f7bd35"/><stop offset="1" stop-color="#a95b0d"/></linearGradient></defs><circle cx="50" cy="50" r="43" fill="#57330d" stroke="#f6c65b" stroke-width="3"/><circle cx="50" cy="50" r="34" fill="url(#ucg)" stroke="#ffe9a0" stroke-width="2"/><path d="M50 22l7 18 19 1-15 12 5 19-16-11-16 11 5-19-15-12 19-1z" fill="#fff1b8" stroke="#9a5b13" stroke-width="2"/></svg>';
-return '<span class="emoji">'+(products.find(p=>p.id===id)?.emoji||"🎮")+'</span>';
+const assets={
+vbucks:{src:"https://purepng.com/public/uploads/large/one-v-buck-dpf.png",alt:"عملة V-Bucks الأصلية"},
+robux:{src:"https://img.icons8.com/color/1200/robux--v1.jpg",alt:"أيقونة Robux"},
+uc:{src:"https://kaesstoree.com/assets/img/kategori/1770140700PT_Image_Feb_4%2C_2026%2C_12_43_12_AM.webp",alt:"عملة PUBG Mobile UC"}
+};
+const p=products.find(x=>x.id===id),a=assets[id];
+return a?'<img src="'+a.src+'" alt="'+a.alt+'" loading="lazy" style="width:100%;height:100%;max-width:112px;max-height:112px;object-fit:contain" onerror="this.style.display=\'none\';this.parentElement.insertAdjacentHTML(\'beforeend\',\'<span class=emoji>'+p.emoji+'</span>\')">':'<span class="emoji">'+(p?.emoji||"🎮")+'</span>';
 }
-const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function getOrders(){try{return JSON.parse(localStorage.getItem("nexora_orders")||"[]")}catch(e){return []}}
 function saveOrders(a){localStorage.setItem("nexora_orders",JSON.stringify(a))}
 function renderProducts(){$("products").innerHTML=products.map(p=>'<article class="product"><div class="coin">'+currencyArt(p.id)+'</div><h3>'+p.name+'</h3><div class="desc">'+p.desc+'</div><div class="buyrow"><span class="price">'+p.price+' د.ل</span><button class="buy" data-buy="'+p.id+'">اطلب الآن</button></div></article>').join("");document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openOrder(b.dataset.buy))}
