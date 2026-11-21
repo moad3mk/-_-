@@ -136,3 +136,47 @@ begin
     alter publication supabase_realtime add table public.messages;
   end if;
 end $$;
+
+ 
+-- نظام الرتب المخصصة: اسم + لون + أيقونة + صلاحيات
+do $$
+declare c record;
+begin
+  for c in
+    select conname from pg_constraint
+    where conrelid='public.profiles'::regclass and contype='c'
+      and pg_get_constraintdef(oid) ilike '%role%'
+  loop
+    execute format('alter table public.profiles drop constraint %I', c.conname);
+  end loop;
+end $$;
+
+create table if not exists public.custom_roles (
+  name text primary key,
+  icon text not null default '🏷️',
+  color text not null default '#8b5cf6',
+  permissions text[] not null default '{}',
+  created_at timestamptz not null default now()
+);
+alter table public.custom_roles enable row level security;
+drop policy if exists "Authenticated users read custom roles" on public.custom_roles;
+create policy "Authenticated users read custom roles" on public.custom_roles
+for select to authenticated using (true);
+drop policy if exists "Admins manage custom roles" on public.custom_roles;
+create policy "Admins manage custom roles" on public.custom_roles
+for all to authenticated using (public.is_admin()) with check (public.is_admin());
+grant select, insert, update, delete on public.custom_roles to authenticated;
+
+create or replace function public.admin_set_role(target_user uuid, new_role text)
+returns void language plpgsql security definer set search_path=public
+as $$
+begin
+ if not public.is_admin() then raise exception 'غير مصرح'; end if;
+ if new_role not in ('عضو','VIP','مشرف','مدير')
+    and not exists (select 1 from public.custom_roles where name=new_role) then
+   raise exception 'الرتبة غير موجودة';
+ end if;
+ update public.profiles set role=new_role where id=target_user;
+end;
+$$;
+grant execute on function public.admin_set_role(uuid,text) to authenticated;
