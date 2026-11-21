@@ -210,3 +210,14 @@ drop trigger if exists set_message_sender_role_before_insert on public.messages;
 create trigger set_message_sender_role_before_insert
 before insert on public.messages
 for each row execute function public.set_message_sender_role();
+
+
+-- رتبة المالك لها صلاحيات الإدارة أيضاً.
+create or replace function public.is_admin()
+returns boolean language sql stable security definer set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role in ('مدير', 'مالك')
+  );
+$$;
