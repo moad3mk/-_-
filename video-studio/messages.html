@@ -11,7 +11,7 @@ async function init(){const u=await sb.auth.getUser();me=u.data.user;if(!me){$("
 $("composer").onsubmit=async e=>{e.preventDefault();const content=$("message").value.trim();if(!content||!me)return;const b=$("composer").querySelector("button");b.disabled=true;
 try{
 if(content.startsWith("/")){
- const parts=content.split(/\\s+/);const cmd=parts[0].toLowerCase();let result;
+ const parts=content.split(/\s+/);const cmd=parts[0].toLowerCase();let result;
  if(cmd==="/owner"&&parts[1])result=await sb.rpc("nexora_chat_command",{cmd:"owner",target_username:parts[1],role_names:null,amount:null});
  else if(cmd==="/role"&&parts[1]&&parts[2])result=await sb.rpc("nexora_chat_command",{cmd:"role",target_username:parts[1],role_names:parts.slice(2).join(" ").split(",").map(x=>x.trim()).filter(Boolean),amount:null});
  else if(cmd==="/clear"&&parts[1])result=await sb.rpc("nexora_chat_command",{cmd:"clear",target_username:null,role_names:null,amount:Number(parts[1])});
