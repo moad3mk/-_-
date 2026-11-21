@@ -180,3 +180,17 @@ begin
 end;
 $$;
 grant execute on function public.admin_set_role(uuid,text) to authenticated;
+
+
+-- رتبة المالك للحساب المحدد
+insert into public.custom_roles (name, icon, color, permissions)
+values ('مالك', '👑', '#f5c542', array['all'])
+on conflict (name) do update
+set icon=excluded.icon, color=excluded.color, permissions=excluded.permissions;
+
+-- إذا كان الحساب مسجلاً بالفعل، تُعيّن له رتبة مالك مباشرة
+update public.profiles p
+set role = 'مالك'
+from auth.users u
+where p.id = u.id
+  and lower(u.email) = lower('moad000moad10@gmail.com');
