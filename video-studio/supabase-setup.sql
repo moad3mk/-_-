@@ -342,3 +342,5 @@ create policy "Admins delete chat messages" on public.messages
 for delete to authenticated using (public.has_permission('delete_messages'));
 
 -- Chat permissions are granted only to the selected custom role.
+
+grant delete on public.messages to authenticated;
