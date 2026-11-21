@@ -168,3 +168,21 @@ begin
 end;
 $$;
 grant execute on function public.nexora_chat_command(text,text,text[],integer) to authenticated;
+
+
+create or replace function public.admin_moderation_status(target_username text)
+returns jsonb language plpgsql security definer set search_path=public
+as $$
+declare target_id uuid; m public.member_moderation;
+begin
+  if not (public.has_permission('ban_members') or public.has_permission('timeout_members')) then raise exception 'لا تملك صلاحية عرض حالة الحظر'; end if;
+  select id into target_id from public.profiles where lower(username)=lower(trim(target_username)) limit 1;
+  if target_id is null then raise exception 'لم نعثر على عضو بهذا الاسم'; end if;
+  select * into m from public.member_moderation where user_id=target_id;
+  if not found then return jsonb_build_object('status','غير محظور'); end if;
+  if m.banned then return jsonb_build_object('status','حظر دائم','reason',m.reason); end if;
+  if m.timeout_until is not null and m.timeout_until>now() then return jsonb_build_object('status','تايم','until',m.timeout_until,'reason',m.reason); end if;
+  return jsonb_build_object('status','غير محظور');
+end;
+$$;
+grant execute on function public.admin_moderation_status(text) to authenticated;
